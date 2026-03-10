@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HQ Admin - Columbia Transport</title>
+    <!-- Use main app styles for consistency -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet.js for HQ Fleet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --border: #334155;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: white;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .admin-sidebar {
+            width: 260px;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .admin-main {
+            flex: 1;
+            padding: 2.5rem;
+            overflow-y: auto;
+            background: #020617;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-online {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-loading {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .btn-hq {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: left;
+        }
+
+        .btn-hq-active {
+            background: var(--primary);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-nav {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .btn-nav:hover {
+            color: white;
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.05);
+        }
+
+        .load-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 150px 100px;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            gap: 1rem;
+            transition: background 0.2s;
+        }
+
+        .load-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .load-row:last-child {
+            border-bottom: none;
+        }
+
+        .load-row span {
+            font-size: 14px;
+        }
+
+        .load-row .id {
+            font-family: monospace;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .load-row .driver {
+            font-weight: 600;
+        }
+
+        .load-row .time {
+            color: var(--text-dim);
+            font-size: 12px;
+        }
+
+        .grid-header {
+            display: grid;
+            grid-template-columns: 100px 1fr 150px 100px;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        #hq-map {
+            height: 450px;
+            background: #0f172a;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .custom-marker {
+            background: var(--primary);
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+        }
+
+        .spin {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-sidebar">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+            <div
+                style="background:var(--primary); color:white; width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px;">
+                CT</div>
+            <h2 style="margin:0; font-size:18px;">HQ ADMIN</h2>
+        </div>
+
+        <nav style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1rem;">
+            <div
+                style="color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.25rem;">
+                Fleet Hub</div>
+            <button class="btn-hq btn-hq-active"><i data-lucide="map"></i> Live Fleet Map</button>
+            <button class="btn-nav"><i data-lucide="users"></i> Management</button>
+            <button class="btn-nav"><i data-lucide="folder-key"></i> Paperwork Vault</button>
+            <button class="btn-nav"><i data-lucide="settings"></i> System Config</button>
+        </nav>
+
+        <div
+            style="margin-top:auto; padding-top:1.5rem; border-top:1px solid var(--border); display:flex; gap:0.75rem; align-items:center;">
+            <div
+                style="width:32px; height:32px; border-radius:50%; background:#334155; display:flex; align-items:center; justify-content:center;">
+                <i data-lucide="shield-check" style="width:16px; color:var(--primary);"></i>
+            </div>
+            <div style="font-size:12px;">
+                <div style="font-weight:700;">Dispatcher</div>
+                <div style="color:var(--text-dim);">HQ Portal v1.4.0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-main">
+        <header style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:3rem;">
+            <div>
+                <h1 style="margin:0; font-size:32px; font-weight:800; letter-spacing:-0.5px;">Fleet Dashboard</h1>
+                <p id="active-count" style="color:var(--text-dim); margin:0.75rem 0 0 0; font-size:16px;">Initializing
+                    connection...</p>
+            </div>
+            <div id="conn-status" class="status-badge status-loading">Connecting...</div>
+        </header>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 style="margin:0; display:flex; align-items:center; gap:0.75rem;"><i data-lucide="navigation"
+                        style="color:var(--primary);"></i> Live Route Map</h3>
+                <span style="font-size:12px; color:var(--text-dim);">Real-time Telemetry Enabled</span>
+            </div>
+            <div id="hq-map"></div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin:0 0 1.5rem 0; display:flex; align-items:center; gap:0.75rem;"><i
+                    data-lucide="clipboard-list" style="color:var(--primary);"></i> Recent Activity</h3>
+            <div class="grid-header">
+                <div>Trip ID</div>
+                <div>Driver / Company</div>
+                <div>Timestamp</div>
+                <div style="text-align:right;">Status</div>
+            </div>
+            <div id="activity-list">
+                <p style="color:var(--text-dim); text-align:center; padding:3rem;">Establishing Supabase tunnel...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const supUrl = 'https://hdsgnhiofkozsvbqdsey.supabase.co';
+        const supKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhkc2duaGlvZmtvenN2YnFkc2V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMjgyMDMsImV4cCI6MjA4ODcwNDIwM30.q52Htt6YX-2ruU6cMO7sQdwwvZe1GyixjlpzmWPZQB0';
+        let supabaseClient = null;
+        let map = null;
+        let driverMarkers = {}; // sessionID -> marker
+
+        async function init() {
+            if (window.lucide) lucide.createIcons();
+
+            try {
+                // 1. Initialize Supabase with safety check
+                const supabaseLib = window.supabase;
+                if (!supabaseLib || typeof supabaseLib.createClient !== 'function') {
+                    console.warn("Supabase library not yet ready or failed to load. Retrying in 1s...");
+                    setTimeout(init, 1000);
+                    return;
+                }
+
+                supabaseClient = supabaseLib.createClient(supUrl, supKey);
+
+                const statusEl = document.getElementById('conn-status');
+                statusEl.className = 'status-badge status-online';
+                statusEl.innerText = 'HQ System Live';
+
+                // 2. Initialize Map
+                initMap();
+
+                // 3. Initial Fetch
+                await refreshData();
+                await fetchLatestPings();
+
+                // 4. Real-time Subscription
+                supabaseClient
+                    .channel('admin_realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'loads' }, payload => {
+                        console.log('Load change received!', payload);
+                        refreshData();
+                    })
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gps_pings' }, payload => {
+                        console.log('GPS Ping received!', payload);
+                        updateDriverMarker(payload.new);
+                    })
+                    .subscribe();
+
+            } catch (e) {
+                console.error("HQ Init Error:", e);
+                document.getElementById('conn-status').innerText = 'Connection Error';
+            }
+        }
+
+        function initMap() {
+            map = L.map('hq-map').setView([38.9517, -92.3341], 5);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{y}/{x}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd',
+                maxZoom: 20
+            }).addTo(map);
+        }
+
+        async function fetchLatestPings() {
+            if (!supabaseClient) return;
+            try {
+                // Get the most recent ping for each driver in the last 2 hours
+                const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+                const { data, error } = await supabaseClient
+                    .from('gps_pings')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) return;
+
+                // Simple dedup for initial load
+                const sessions = {};
+                data.forEach(ping => {
+                    if (!sessions[ping.trip_id]) {
+                        sessions[ping.trip_id] = ping;
+                        updateDriverMarker(ping);
+                    }
+                });
+            } catch (e) {
+                console.error("Error fetching latest pings:", e);
+            }
+        }
+
+        function updateDriverMarker(ping) {
+            if (!map || !ping.lat || !ping.lng) return;
+
+            const sessionID = ping.trip_id || 'unknown';
+            const pos = [parseFloat(ping.lat), parseFloat(ping.lng)];
+
+            if (driverMarkers[sessionID]) {
+                driverMarkers[sessionID].setLatLng(pos);
+            } else {
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    iconSize: [12, 12]
+                });
+                const marker = L.marker(pos, { icon }).addTo(map);
+                marker.bindPopup(`
+                    <div style="color:black;">
+                        <b>Driver:</b> ${ping.driver_name || 'Anonymous'}<br>
+                        <b>Truck:</b> ${ping.truck_number || 'N/A'}<br>
+                        <b>Last Ping:</b> ${new Date(ping.created_at).toLocaleTimeString()}
+                    </div>
+                `);
+                driverMarkers[sessionID] = marker;
+            }
+
+            // Optional: Fit bounds if it's the first few markers
+            if (Object.keys(driverMarkers).length === 1) {
+                map.setView(pos, 8);
+            }
+        }
+
+        async function refreshData() {
+            if (!supabaseClient) return;
+            const list = document.getElementById('activity-list');
+            const countEl = document.getElementById('active-count');
+
+            const { data, error } = await supabaseClient
+                .from('loads')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (error) {
+                list.innerHTML = `<p style="color:#ef4444; text-align:center;">Failed to fetch: ${error.message}</p>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                list.innerHTML = `<p style="color:var(--text-dim); text-align:center; padding:3rem;">No active driver sessions found.</p>`;
+                countEl.innerText = '0 Drivers active in field';
+                return;
+            }
+
+            countEl.innerText = `${data.length} Recent load submissions`;
+
+            list.innerHTML = data.map(row => `
+                <div class="load-row">
+                    <span class="id">${row.invoice_number || 'N/A'}</span>
+                    <span class="driver">${row.billed_to || 'N/A'}</span>
+                    <span class="time">${new Date(row.created_at).toLocaleString()}</span>
+                    <div style="text-align:right;">
+                        <span class="status-badge status-online" style="font-size:10px;">Submitted</span>
+                    </div>
+                </div>
+            `).join('');
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+
+</html>

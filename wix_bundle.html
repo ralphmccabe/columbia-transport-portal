@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Columbia Transport LLC - Logistics Portal (v14)</title>
+
+    <!-- External Libraries (CDNs) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* INLINED style.css */
+        :root {
+            --primary: #3b82f6;
+            --bg: #0b0f19;
+            --card-bg: rgba(23, 31, 48, 0.8);
+            --sidebar-bg: rgba(255, 255, 255, 0.03);
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-dim: #cbd5e1;
+            --accent-blue: #0ea5e9;
+            --accent-glow: rgba(14, 165, 233, 0.3);
+            --panel-radius: 1.5rem;
+        }
+
+        /* ... [Remaining CSS] ... */
+    </style>
+</head>
+
+<body>
+    <!-- [HTML content will be inserted here] ... -->
+
+    <script>
+        /* INLINED app.js */
+        // Configure PDF.js worker to use CDN
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        // ... [JS content will be inserted here] ...
+    </script>
+</body>
+
+</html>

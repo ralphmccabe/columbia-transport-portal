@@ -1,0 +1,4546 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Columbia Transport LLC Logistics Portal</title>
+    
+    <style>
+:root {
+  --primary: #3b82f6;
+  --bg: #0b0f19;
+  --card-bg: rgba(23, 31, 48, 0.8);
+  --sidebar-bg: rgba(255, 255, 255, 0.03);
+  --glass: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #ffffff;
+  --text-dim: #cbd5e1;
+  --accent-blue: #0ea5e9;
+  --accent-glow: rgba(14, 165, 233, 0.3);
+  --panel-radius: 1.5rem;
+}
+
+/* Premium Modal Scrollbar */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.3);
+  border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 165, 233, 0.5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+  color: var(--text);
+  overflow: hidden;
+  height: 100dvh;
+  width: 100vw;
+}
+
+#app {
+  display: flex;
+  height: 100dvh;
+  width: 100vw;
+  padding: 1.5rem;
+  gap: 1.5rem;
+}
+
+.sidebar {
+  width: 80px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+  z-index: 5000;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-shrink: 0;
+}
+
+.logo-container {
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-circle {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: white;
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.tool-btn {
+  width: 100%;
+  padding: 0.8rem 0;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+}
+
+.stamp-tool-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.stamp-tool-btn:hover {
+  background: rgba(14, 165, 233, 0.1);
+  border-color: var(--accent-blue);
+  transform: translateX(4px);
+}
+
+.fab-toggle {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5000;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.5);
+  transition: all 0.3s;
+}
+
+.fab-toggle:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.6);
+}
+
+
+
+.btn-premium {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+  color: white !important;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.btn-premium:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4) !important;
+  background: linear-gradient(135deg, #60a5fa, #3b82f6) !important;
+}
+
+.btn-premium:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3) !important;
+}
+
+.loading {
+  opacity: 0.3 !important;
+  transform: scale(0.9) !important;
+  pointer-events: none !important;
+  filter: blur(2px);
+}
+
+.tool-btn i {
+  width: 22px;
+  height: 22px;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.tool-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tool-btn:hover i {
+  transform: translateY(-2px);
+  opacity: 1;
+  color: var(--accent-blue);
+}
+
+.tool-btn.active {
+  color: var(--accent-blue);
+  background: rgba(14, 165, 233, 0.05);
+}
+
+.tool-btn.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: var(--accent-blue);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Premium UI Design System */
+:root {
+  --neon-blue: #0ea5e9;
+  --neon-glow: rgba(14, 165, 233, 0.4);
+  --glass-bg: rgba(15, 23, 42, 0.8);
+  --glass-border: rgba(14, 165, 233, 0.3);
+}
+
+.premium-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.premium-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.premium-input,
+.premium-input-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.premium-input:focus-within,
+.premium-input-box:focus-within {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 15px var(--neon-glow);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.premium-input i {
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+.premium-input:focus-within i {
+  color: var(--neon-blue);
+}
+
+.premium-input input,
+.premium-input-box textarea {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 0.95rem;
+  width: 100%;
+  outline: none;
+}
+
+.premium-input input::placeholder,
+.premium-input-box textarea::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.premium-input-box {
+  align-items: flex-start;
+  min-height: 100px;
+}
+
+.premium-input-box textarea {
+  resize: none;
+  height: 100%;
+  line-height: 1.5;
+}
+
+.btn-premium {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px var(--neon-glow);
+  filter: brightness(1.1);
+}
+
+.btn-premium:active {
+  transform: translateY(0);
+}
+
+/* Modal specific time display */
+#modal-current-time {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+/* Viewer Modal Footer */
+.viewer-footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-success {
+  flex: 2;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+}
+
+.version-badge {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  margin-right: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 480px) {
+  .viewer-footer {
+    flex-direction: column-reverse;
+  }
+
+  .btn-secondary,
+  .btn-success {
+    width: 100%;
+    flex: none;
+  }
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-bar {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(14, 165, 233, 0.4);
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 420px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.search-bar:focus-within {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.search-bar input::placeholder {
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.viewer-container {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  border-radius: var(--panel-radius);
+  padding: 3rem;
+}
+
+#pdf-canvas-container {
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
+  position: relative;
+  background: white;
+  border-radius: 4px;
+}
+
+.overlay-item {
+  position: absolute;
+  pointer-events: auto;
+  transform-origin: top left;
+}
+
+.sig-item img {
+  width: 150px;
+  height: 70px;
+  object-fit: contain;
+}
+
+.overlay-text {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(2px);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 1px white;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  white-space: nowrap;
+  font-size: 14px;
+  user-select: none;
+}
+
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: none;
+  z-index: 4000;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+}
+
+.overlay-point {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: #0ea5e9;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.6);
+  cursor: grab;
+  z-index: 1500;
+  animation: pulse 2s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-point:active {
+  cursor: grabbing;
+}
+
+.delete-anno {
+  position: absolute;
+  top: -22px;
+  right: -22px;
+  width: 26px;
+  height: 26px;
+  background: #ef4444;
+  color: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  z-index: 2000;
+}
+
+.delete-anno:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  background: #dc2626;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(14, 165, 233, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+}
+
+/* TABLET/MOBILE COMPACT UI */
+@media (max-width: 768px) {
+  #app {
+    flex-direction: column-reverse;
+    /* Bottom Nav */
+    padding: 0;
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  header {
+    display: none !important;
+    /* Hide header for space */
+  }
+
+  .sidebar {
+    width: 100%;
+    height: calc(65px + env(safe-area-inset-bottom));
+    flex-direction: row;
+    padding: 0 0 env(safe-area-inset-bottom) 0;
+    background: #0f172a;
+    border-right: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2000;
+  }
+
+  .logo-container,
+  .user-profile-sidebar {
+    display: none;
+  }
+
+  .tool-group {
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0 0.5rem;
+    gap: 0.5rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Hide scrollbar for cleaner look on mobile */
+  }
+
+  .tool-group::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tool-btn {
+    flex-direction: column;
+    padding: 0.25rem;
+    min-width: 50px;
+    font-size: 8px;
+    gap: 2px;
+    height: 100%;
+    justify-content: center;
+  }
+
+  .tool-btn i {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Shrink Admin Button on Mobile - Force tiny footprint */
+  #btn-admin-portal {
+    flex: 0 0 40px !important;
+    /* Do not grow, do not shrink, stay 40px */
+    width: 40px !important;
+    padding: 0.25rem 0 !important;
+    opacity: 0.3 !important;
+    overflow: hidden;
+  }
+
+  #btn-admin-portal span {
+    display: none !important;
+    /* Hide "Admin SOON" text on mobile to save space */
+  }
+
+  /* Shrink blue text annotations on mobile so PDF forms remain fillable */
+  .overlay-text {
+    font-size: 10px !important;
+    padding: 2px 4px !important;
+  }
+
+  .main-content {
+    flex: 1;
+    height: calc(100dvh - 65px - env(safe-area-inset-bottom));
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+  }
+
+  .viewer-container {
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    border: none;
+    background: #0b0f19;
+  }
+
+  #pdf-view {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+    background: #1e293b;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #pdf-canvas-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 auto !important;
+    transform: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  canvas {
+    width: 100vw !important;
+    height: auto !important;
+    display: block;
+  }
+
+  .vault-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .modal-content {
+    padding: 1.25rem;
+    width: 95%;
+  }
+}
+
+/* Desktop-Only Mobile Preview Emulator */
+@media (min-width: 769px) {
+  body.mobile-preview-mode {
+    background: #020617;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow: auto;
+  }
+
+  body.mobile-preview-mode #app {
+    width: 390px !important;
+    height: 844px !important;
+    border: 8px solid #1e293b;
+    border-radius: 40px;
+    box-shadow: 0 0 100px rgba(0, 0, 0, 0.8), 0 0 0 12px #334155;
+    position: relative;
+    padding: 0;
+    flex-direction: column-reverse;
+    /* Bottom Nav */
+    overflow: hidden;
+    background: #0b0f19;
+  }
+
+  body.mobile-preview-mode .sidebar {
+    width: 100%;
+    height: calc(65px + env(safe-area-inset-bottom));
+    flex-direction: row;
+    padding: 0 0 env(safe-area-inset-bottom) 0;
+    background: #0f172a;
+    border-right: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2000;
+  }
+
+  body.mobile-preview-mode .logo-container,
+  body.mobile-preview-mode .user-profile-sidebar {
+    display: none;
+  }
+
+  body.mobile-preview-mode .tool-group {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+    padding: 0;
+    overflow-x: auto;
+    gap: 0;
+  }
+
+  body.mobile-preview-mode .tool-btn {
+    flex-direction: column;
+    padding: 0.25rem;
+    min-width: 55px;
+    height: 100%;
+    font-size: 8px;
+    gap: 2px;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    text-align: center;
+    color: var(--text-dim);
+  }
+
+  body.mobile-preview-mode .tool-btn i {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Shrink Admin Button in Preview Mode */
+  body.mobile-preview-mode #btn-admin-portal {
+    flex: 0 0 40px !important;
+    width: 40px !important;
+    padding: 0.25rem 0 !important;
+    opacity: 0.3 !important;
+    overflow: hidden;
+  }
+
+  body.mobile-preview-mode #btn-admin-portal span {
+    display: none !important;
+  }
+
+  body.mobile-preview-mode header {
+    display: none !important;
+  }
+
+  body.mobile-preview-mode .main-content {
+    flex: 1;
+    height: calc(100dvh - 65px - env(safe-area-inset-bottom));
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.mobile-preview-mode .viewer-container {
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    border: none;
+  }
+
+  body.mobile-preview-mode #pdf-view {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+    padding: 0;
+  }
+
+  body.mobile-preview-mode #pdf-canvas-container {
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  body.mobile-preview-mode canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
+/* Premium Design System Additions */
+:root {
+  --neon-blue: #0ea5e9;
+  --neon-glow: rgba(14, 165, 233, 0.4);
+  --glass-bg: rgba(15, 23, 42, 0.82);
+  --glass-border: rgba(14, 165, 233, 0.3);
+}
+
+.premium-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-align: left;
+}
+
+.premium-group label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.85);
+  padding-left: 2px;
+}
+
+.premium-input,
+.premium-input-box {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 0.85rem 1.1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-input:focus-within,
+.premium-input-box:focus-within {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 20px var(--neon-glow), inset 0 0 10px rgba(14, 165, 233, 0.1);
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+.premium-input i,
+.premium-input-box i {
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.55);
+  transition: all 0.3s ease;
+}
+
+.premium-input:focus-within i,
+.premium-input-box:focus-within i {
+  color: var(--neon-blue);
+  filter: drop-shadow(0 0 5px var(--neon-glow));
+}
+
+.premium-input input,
+.premium-input-box textarea {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-size: 0.95rem;
+  width: 100%;
+  outline: none !important;
+  font-family: inherit;
+}
+
+.premium-input input::placeholder,
+.premium-input-box textarea::placeholder {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.premium-input-box {
+  align-items: flex-start;
+  min-height: 100px;
+}
+
+.premium-input-box textarea {
+  resize: none;
+  height: 100%;
+  line-height: 1.6;
+  padding-top: 2px;
+}
+
+.btn-premium {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 30px var(--neon-glow);
+  filter: brightness(1.2);
+}
+
+.btn-premium:active {
+  transform: translateY(0) scale(1);
+}
+
+#modal-current-time {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.premium-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  font-weight: 800 !important;
+  display: block !important;
+  margin-bottom: 4px !important;
+  letter-spacing: 0.1em !important;
+  line-height: 1 !important;
+}
+
+/* Stamp Tool Base (on Canvas) */
+.stamp-item {
+  position: absolute !important;
+  padding: 8px 16px;
+  background: rgba(15, 23, 42, 0.95) !important;
+  backdrop-filter: blur(4px) !important;
+  border: 4px solid currentColor !important;
+  border-radius: 6px;
+  font-weight: 900 !important;
+  font-size: 16px !important;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.05em;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Unified Stamp Colors (Canvas & Picker) */
+.stamp-picked-up {
+  color: #2dd4bf !important;
+  border-color: #2dd4bf !important;
+}
+
+.stamp-in-route {
+  color: #818cf8 !important;
+  border-color: #818cf8 !important;
+}
+
+.stamp-delivered {
+  color: #f472b6 !important;
+  border-color: #f472b6 !important;
+}
+
+.stamp-picked-up {
+  color: #2dd4bf !important;
+  border-color: #2dd4bf !important;
+}
+
+.stamp-in-route {
+  color: #818cf8 !important;
+  border-color: #818cf8 !important;
+}
+
+.stamp-delivered {
+  color: #f472b6 !important;
+  border-color: #f472b6 !important;
+}
+
+.stamp-paid {
+  color: #f87171 !important;
+  border-color: #f87171 !important;
+}
+
+.stamp-completed {
+  color: #34d399 !important;
+  border-color: #34d399 !important;
+}
+
+.stamp-urgent {
+  color: #fb923c !important;
+  border-color: #fb923c !important;
+}
+
+.stamp-received {
+  color: #38bdf8 !important;
+  border-color: #38bdf8 !important;
+}
+
+.stamp-send-to-billing,
+.stamp-billing {
+  color: #a78bfa !important;
+  border-color: #a78bfa !important;
+}
+
+.stamp-refused {
+  color: #94a3b8 !important;
+  border-color: #94a3b8 !important;
+}
+
+.stamp-void {
+  color: #64748b !important;
+  border-color: #64748b !important;
+}
+
+.stamp-hold,
+.stamp-on-hold {
+  color: #fbbf24 !important;
+  border-color: #fbbf24 !important;
+}
+
+.stamp-extra-pick-up {
+  color: #fb923c !important;
+  border-color: #fb923c !important;
+}
+
+.stamp-extra-delivery {
+  color: #34d399 !important;
+  border-color: #34d399 !important;
+}
+
+.stamp-no-charge {
+  color: #f472b6 !important;
+  border-color: #f472b6 !important;
+}
+
+.stamp-partial-payment {
+  color: #60a5fa !important;
+  border-color: #60a5fa !important;
+}
+
+/* Picker Specifics */
+.stamp-tool-btn {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stamp-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Custom Scrollbar for Picker */
+#stamp-picker::-webkit-scrollbar {
+  width: 6px;
+}
+
+#stamp-picker::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+#stamp-picker::-webkit-scrollbar-thumb {
+  background: #0ea5e9;
+  border-radius: 10px;
+}
+
+.delete-overlay {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 2000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: auto !important;
+}
+
+.delete-overlay:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.pen-overlay {
+  pointer-events: auto !important;
+  /* Must be auto to allow clicking the child X */
+  background: transparent !important;
+  border: none !important;
+}
+
+.pen-overlay .delete-overlay {
+  top: 0;
+  right: 0;
+  opacity: 0;
+  /* Hidden completely to prevent visual clutter, only appears on hover */
+  width: 20px;
+  height: 20px;
+  background: #ef4444 !important;
+  /* Make it red as the user expected */
+  color: white !important;
+  border-radius: 50%;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  pointer-events: auto !important;
+}
+
+.pen-overlay:hover .delete-overlay {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.overlay-item {
+  position: absolute;
+  pointer-events: auto;
+  user-select: none;
+}
+
+/* Coming Soon Badge */
+.coming-soon-badge {
+  font-size: 10px;
+  background: #f59e0b;
+  color: #0f172a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Vault Item Styles */
+.vault-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.vault-item:hover {
+  background: rgba(14, 165, 233, 0.08);
+  border-color: rgba(14, 165, 233, 0.2);
+  transform: translateY(-2px);
+}
+
+.item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-driver {
+  font-size: 0.7rem;
+  color: var(--accent-blue);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.item-inv {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+}
+
+.item-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.vault-actions {
+  flex-shrink: 0;
+}
+
+.delete-vault-item {
+  transition: all 0.2s ease;
+}
+
+.delete-vault-item:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  transform: scale(1.05);
+}
+
+/* Footer Actions */
+.viewer-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  flex-wrap: wrap;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+}
+
+.footer-legal {
+  flex: 1 1 100%;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+}
+
+.footer-legal span {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.btn-footer {
+  width: auto;
+  min-width: 140px;
+  padding: 0.75rem 1.5rem;
+  flex-direction: row !important;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-secondary-outline {
+  background: transparent;
+  border: 1px dashed var(--accent-blue) !important;
+  color: white;
+}
+
+.btn-success-premium {
+  background: #059669 !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+}
+
+@media (max-width: 480px) {
+  .viewer-footer {
+    padding: 1rem;
+    gap: 0.75rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-footer {
+    width: 100%;
+    height: 50px;
+  }
+
+  .footer-legal {
+    order: 3;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+}
+</style>
+    <!-- Leaflet.js for Route Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+
+<body>
+    <div id="debug-error-banner"
+        style="display:none; position:fixed; top:0; left:0; width:100%; background:#ef4444; color:white; padding:15px; text-align:left; z-index:9999; font-weight:bold; font-family:monospace; font-size:12px; white-space:pre-wrap; max-height:200px; overflow:auto; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+    </div>
+    <div id="app">
+        <!-- Start Trip Overlay -->
+        <div id="start-overlay" class="modal-overlay">
+            <div class="modal-content glass">
+                <div class="logo-circle" style="margin: 0 auto 1.5rem;">CT</div>
+                <h2>Columbia Transport LLC Logistics Portal</h2>
+                <p style="color: var(--text-dim); margin-bottom: 2rem;">Driver Authentication & Trip Start</p>
+
+
+                <div class="format-toggle" style="margin-bottom: 2rem;">
+
+                    <div class="input-group">
+                        <label for="driver-name">Driver / Company ID</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="user"></i>
+                            <input type="text" id="driver-name" name="driver-id" placeholder="Enter your ID">
+                        </div>
+                    </div>
+                    <button type="button" class="tool-btn btn-premium" id="btn-start-trip" onclick="window.handleStartTrip()"
+                        style="width: 100%; flex-direction: row; justify-content: center; background: var(--primary); margin-top: 1.5rem; border-radius: 12px; height: 50px;">
+                        <i data-lucide="play"></i>
+                        Start Shift
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Premium Navigation Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="logo-circle">CT</div>
+            </div>
+
+            <div class="tool-group">
+                <button type="button" class="tool-btn" id="btn-vault">
+                    <i data-lucide="archive"></i>
+                    <span>Vault</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-manual-load">
+                    <i data-lucide="plus-square"></i>
+                    <span>New Load</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-import">
+                    <i data-lucide="upload-cloud"></i>
+                    <span>Import</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-quick-scan">
+                    <i data-lucide="camera"></i>
+                    <span>Scan</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-text">
+                    <i data-lucide="bold"></i>
+                    <span>Text</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-pen">
+                    <i data-lucide="edit-3"></i>
+                    <span>Pen</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-eraser">
+                    <i data-lucide="eraser"></i>
+                    <span>Eraser</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-undo" title="Undo Last Pen Stroke">
+                    <i data-lucide="undo-2"></i>
+                    <span>Undo</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-stamp">
+                    <i data-lucide="award"></i>
+                    <span>Stamps</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-sign">
+                    <i data-lucide="user-check"></i>
+                    <span>Sign</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-route-map">
+                    <i data-lucide="map"></i>
+                    <span>Map</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-attach">
+                    <i data-lucide="paperclip"></i>
+                    <span>Attach</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-share">
+                    <i data-lucide="share-2"></i>
+                    <span>Share</span>
+                </button>
+                <button type="button" class="tool-btn" id="btn-reset-view" style="color: #ef4444;">
+                    <i data-lucide="refresh-cw"></i>
+                    <span>Clear</span>
+                </button>
+            </div>
+
+            <button type="button" id="btn-admin-portal" class="tool-btn" style="opacity: 0.5; cursor: not-allowed;"
+                title="Admin Portal - Cloud Only">
+                <i data-lucide="shield-check"></i>
+                <span>Admin <small class="coming-soon-badge" style="margin-left:2px;">SOON</small></span>
+            </button>
+
+            <div class="user-profile-sidebar">
+                <img src="https://ui-avatars.com/api/?name=Driver&background=0ea5e9&color=fff" alt="Profile">
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <header>
+                <div class="search-bar">
+                    <i data-lucide="search" style="width: 18px; color: var(--text-dim);"></i>
+                    <input type="text" id="header-search" name="search"
+                        placeholder="Search invoices, stops, or files...">
+                </div>
+                <div class="header-actions">
+                    <div class="icon-badge">
+                        <i data-lucide="bell"></i>
+                        <span class="badge-dot"></span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="viewer-container">
+                <div id="pdf-canvas-container">
+                    <div style="color: var(--text-dim); text-align: center; padding: 10rem;">
+                        <i data-lucide="file-up"
+                            style="width: 64px; height: 64px; margin-bottom: 1.5rem; opacity: 0.2;"></i>
+                        <p style="font-weight: 600; font-size: 1.2rem;">Drop an Invoice to start editing</p>
+                    </div>
+                </div>
+
+                <!-- Premium Attachment Popup -->
+                <div id="attachment-popup" class="popup"
+                    style="border: 2px solid #0ea5e9; box-shadow: 0 0 25px rgba(14, 165, 233, 0.4); border-radius: 16px; overflow: hidden; width: 90%; max-width: 380px;">
+                    <div class="popup-header"
+                        style="background: rgba(15, 23, 42, 0.95); padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <h4 style="color: white; font-weight: 700; margin: 0;">Related Logistics Documents</h4>
+                        <button type="button" id="close-popup"
+                            style="background:none; border:none; color:white; cursor:pointer; padding:5px; display:flex; align-items:center; justify-content:center;">
+                            <i data-lucide="x" style="width:20px; height:20px;"></i>
+                        </button>
+                    </div>
+                    <div
+                        style="background: rgba(15, 23, 42, 0.9); padding: 1rem; overflow-y: auto; max-height: calc(80vh - 80px);">
+                        <div
+                            style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem;">
+
+                            <input type="text" id="popup-dot-name" name="popup-dot-name"
+                                placeholder="e.g., BOLs, Receipts..."
+                                style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 8px; padding: 8px 12px; color: white; font-size: 14px; outline: none; transition: border-color 0.2s;"
+                                onfocus="this.style.borderColor='#0ea5e9'"
+                                onblur="this.style.borderColor='rgba(14, 165, 233, 0.3)'">
+                        </div>
+                        <div class="grid-attachments" id="file-list"
+                            style="grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; margin-top: 0.5rem; max-height: 45vh; overflow-y: auto;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+                            <button type="button" class="tool-btn" id="btn-scan-camera"
+                                style="flex-direction: row; height: 44px; background: #0ea5e9; color: white; border-radius: 10px; border: none; font-weight: 700;"><i
+                                    data-lucide="camera" style="width:18px;"></i> Scan</button>
+                            <button type="button" class="tool-btn" id="btn-upload-file"
+                                style="flex-direction: row; height: 44px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-weight: 700;"><i
+                                    data-lucide="upload" style="width:18px;"></i> Upload</button>
+                        </div>
+                        <p
+                            style="color: rgba(255,255,255,0.6); font-size: 9px; text-align: center; margin-top: 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">
+                            Tip: You can add multiple documents to this one location
+                        </p>
+                    </div>
+                </div>
+            </main>
+
+            <div class="viewer-footer">
+                <div class="footer-legal">
+                    <span>Columbia Transport LLC Logistics Portal</span>
+                    Created by Ralph Mccabe - All Rights Reserved 2026
+                    <span class="version-badge"
+                        style="margin-left: 8px; padding: 2px 6px; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3); color: #0ea5e9; border-radius: 4px; font-size: 10px; font-weight: 800; vertical-align: middle;">v14</span>
+                </div>
+                <div class="viewer-footer" style="justify-content: flex-end; width: 100%;">
+                    <button type="button" class="tool-btn btn-footer btn-success-premium active" id="btn-finish">
+                        <i data-lucide="send"></i> Finish & Submit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Utility Modals -->
+
+            <!-- Premium Shipment Entry Modal -->
+            <div id="load-entry-modal" class="modal-overlay" style="display: none; z-index: 8000;">
+                <div class="modal-content glass"
+                    style="max-width: 650px; width: 95%; max-height: 85dvh; overflow-y: auto; padding: 1.5rem; padding-bottom: 4rem; border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 24px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+
+                    <!-- Header -->
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div
+                                style="background: linear-gradient(135deg, #0ea5e9, #22d3ee); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);">
+                                <i data-lucide="box" style="color: white; width: 24px;"></i>
+                            </div>
+                            <div>
+                                <h4
+                                    style="margin: 0; font-size: 0.7rem; letter-spacing: 0.2em; opacity: 0.6; text-transform: uppercase;">
+                                    Logistics</h4>
+                                <h3
+                                    style="margin: 0; font-size: 1.1rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 800;">
+                                    Application</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;">
+                        <i data-lucide="truck" style="color: #0ea5e9; width: 20px;"></i>
+                        <h2
+                            style="margin: 0; font-size: 1.25rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Add New Shipment</h2>
+                    </div>
+
+                    <!-- Input Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="premium-group">
+                            <label for="manual-inv">Invoice #</label>
+                            <div class="premium-input">
+                                <i data-lucide="file-text"></i>
+                                <input type="text" id="manual-inv" placeholder="Date,Name of Paper Work and Job ID#">
+                            </div>
+                        </div>
+                        <div class="premium-group">
+                            <label for="manual-po">PO #</label>
+                            <div class="premium-input">
+                                <i data-lucide="clipboard-list"></i>
+                                <input type="text" id="manual-po" placeholder="e.g. PO-77215">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="premium-group">
+                            <label for="manual-load">LOAD #</label>
+                            <div class="premium-input">
+                                <i data-lucide="hash"></i>
+                                <input type="text" id="manual-load" placeholder="e.g. L-5509">
+                            </div>
+                        </div>
+                        <div class="premium-group">
+                            <label for="manual-order">ORDER #</label>
+                            <div class="premium-input">
+                                <i data-lucide="shopping-cart"></i>
+                                <input type="text" id="manual-order" placeholder="e.g. ORD-102">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="premium-group">
+                            <label for="manual-truck">Truck #</label>
+                            <div class="premium-input">
+                                <i data-lucide="container"></i>
+                                <input type="text" id="manual-truck" placeholder="e.g. TRK-410">
+                            </div>
+                        </div>
+                        <div class="premium-group">
+                            <label for="manual-trailer">Trailer #</label>
+                            <div class="premium-input">
+                                <i data-lucide="columns"></i>
+                                <input type="text" id="manual-trailer" placeholder="e.g. TLR-22">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="premium-group">
+                            <label for="manual-driver-id">DRIVER-ID</label>
+                            <div class="premium-input">
+                                <i data-lucide="user-square"></i>
+                                <input type="text" id="manual-driver-id" placeholder="e.g. DRV-99">
+                            </div>
+                        </div>
+                        <div class="premium-group">
+                            <label for="manual-payment">Payment</label>
+                            <div class="premium-input">
+                                <i data-lucide="credit-card"></i>
+                                <input type="text" id="manual-payment" placeholder="e.g. T-CHECK / COD">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="premium-group" style="margin-bottom: 1.5rem;">
+                        <label for="manual-billed-to">Billed To (Company Name & Address)</label>
+                        <div class="premium-input">
+                            <i data-lucide="building"></i>
+                            <input type="text" id="manual-billed-to" placeholder="Full Billing Name & Address">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="premium-group">
+                            <label for="manual-from">Origin</label>
+                            <div class="premium-input-box">
+                                <i data-lucide="map-pin" style="color: #0ea5e9;"></i>
+                                <textarea id="manual-from"
+                                    placeholder="CHICAGO, IL (ORD)&#10;1201 W Adams St..."></textarea>
+                            </div>
+                        </div>
+                        <div class="premium-group">
+                            <label for="manual-to">Destination</label>
+                            <div class="premium-input-box">
+                                <i data-lucide="navigation" style="color: #0ea5e9;"></i>
+                                <textarea id="manual-to"
+                                    placeholder="DALLAS, TX (DFW)&#10;2100 N Stemmons Fwy..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Show Route Button -->
+                    <div style="margin-bottom: 1.5rem; text-align: center;">
+                        <button type="button" id="btn-show-route"
+                            style="background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; border: none; border-radius: 12px; padding: 0.75rem 2rem; font-weight: 700; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(14,165,233,0.4);">
+                            <i data-lucide="navigation" style="width:16px; height:16px;"></i>
+                            Show Route &amp; Calculate Miles
+                        </button>
+                    </div>
+
+                    <!-- Footer Fields (Description, Miles, Total, Notes) -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                        <div class="premium-group">
+                            <label for="manual-details">Item Description & Qty</label>
+                            <div class="premium-input">
+                                <i data-lucide="package"></i>
+                                <input type="text" id="manual-details" placeholder="1 vehicle / 4500 lbs">
+                            </div>
+                        </div>
+                        <div class="premium-group">
+                            <label for="manual-miles">Miles</label>
+                            <div class="premium-input">
+                                <i data-lucide="route"></i>
+                                <input type="text" id="manual-miles" placeholder="450">
+                            </div>
+                        </div>
+                        <div class="premium-group">
+                            <label for="manual-total">Total Billed ($)</label>
+                            <div class="premium-input">
+                                <i data-lucide="dollar-sign"></i>
+                                <input type="text" id="manual-total" placeholder="3200.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="premium-group" style="margin-bottom: 2.5rem;">
+                        <label for="manual-notes">Notes</label>
+                        <div class="premium-input-box">
+                            <i data-lucide="sticky-note" style="color: #0ea5e9;"></i>
+                            <textarea id="manual-notes"
+                                placeholder="Any special instructions or reference notes..."></textarea>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" id="close-load" class="tool-btn"
+                            style="border: 1px solid rgba(255,255,255,0.1); padding: 0.75rem 1.5rem; border-radius: 12px; background: rgba(255,255,255,0.05);">Cancel</button>
+                        <button type="button" class="tool-btn btn-premium" id="btn-save-load"
+                            style="background: #0ea5e9; border: none; padding: 0.75rem 1.5rem; border-radius: 12px; color: white; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);">
+                            <i data-lucide="edit-3" style="width: 18px;"></i>
+                            Create Shipment
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard Overlay -->
+        <div id="admin-modal" class="modal-overlay" style="display: none; z-index: 5000;">
+            <div class="modal-content glass"
+                style="max-width: 900px; width: 95%; height: 80vh; display: flex; flex-direction: column; padding: 0;">
+                <div class="popup-header"
+                    style="padding: 1.25rem 2rem; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="logo-circle" style="width: 32px; height: 32px; font-size: 0.8rem;">AL</div>
+                        <h2 style="margin: 0; font-size: 1.5rem;">Admin Control Center</h2>
+                        <span id="sync-status"
+                            style="margin-left: 1rem; font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(10, 185, 129, 0.2); display: flex; align-items: center; gap: 4px;">
+                            <i data-lucide="cloud-check" style="width: 12px;"></i> LIVE
+                        </span>
+                    </div>
+                    <button type="button" class="tool-btn" id="close-admin" style="padding: 0; min-width: auto; opacity: 0.6;"><i
+                            data-lucide="x"></i></button>
+                </div>
+
+                <div class="admin-toolbar"
+                    style="padding: 1rem 2rem; background: rgba(2, 6, 23, 0.4); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; gap: 1rem; align-items: center;">
+                    <div class="input-wrapper" style="width: 250px; background: rgba(0,0,0,0.3);">
+                        <i data-lucide="search" style="width: 14px;"></i>
+                        <input type="text" id="admin-search" placeholder="Search Invoice / BOL..."
+                            style="font-size: 0.8rem;">
+                    </div>
+                    <select id="filter-driver"
+                        style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.8rem;">
+                        <option value="all">All Drivers</option>
+                    </select>
+                    <div style="flex: 1;"></div>
+                    <button type="button" class="tool-btn" id="btn-refresh-admin"
+                        style="flex-direction: row; gap: 8px; padding: 0.5rem 1rem; font-size: 0.8rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                        <i data-lucide="refresh-cw" style="width: 14px;"></i> Refresh
+                    </button>
+                </div>
+
+                <div id="admin-load-list" style="flex: 1; overflow-y: auto; padding: 1rem 2rem;">
+                    <!-- Submissions will load here -->
+                    <div style="text-align: center; padding: 5rem; opacity: 0.5;">
+                        <i data-lucide="cloud-off" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                        <p>Supabase connection required to view cloud submissions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Restored Stamp Picker (Centered & Fixed) -->
+        <div id="stamp-picker" class="glass"
+            style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; background: rgba(15, 23, 42, 0.98); border: 2px solid #0ea5e9; border-radius: 20px; padding: 1.5rem; width: 320px; max-height: 85dvh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,0,0,0.8); backdrop-filter: blur(20px);">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; position: sticky; top: -1.5rem; background: rgba(15, 23, 42, 0.98); padding: 0.5rem 0; z-index: 10;">
+                <h4
+                    style="color: white; margin: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800;">
+                    Select Stamp</h4>
+                <button type="button" onclick="document.getElementById('stamp-picker').style.display='none'"
+                    style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; border-radius: 10px; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i data-lucide="x" style="width: 20px;"></i>
+                </button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #2dd4bf;"
+                    onclick="addStamp('PICKED UP')">PICKED UP</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #818cf8;" onclick="addStamp('IN ROUTE')">IN
+                    ROUTE</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #f472b6;"
+                    onclick="addStamp('DELIVERED')">DELIVERED</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #f87171;"
+                    onclick="addStamp('PAID')">PAID</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #34d399;"
+                    onclick="addStamp('COMPLETED')">COMPLETED</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #fb923c;"
+                    onclick="addStamp('URGENT')">URGENT</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #38bdf8;"
+                    onclick="addStamp('RECEIVED')">RECEIVED</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #a78bfa;"
+                    onclick="addStamp('SEND TO BILLING')">SEND TO BILLING</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #94a3b8;"
+                    onclick="addStamp('REFUSED')">REFUSED</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #64748b;"
+                    onclick="addStamp('VOID')">VOID</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #fbbf24;" onclick="addStamp('ON HOLD')">ON
+                    HOLD</button>
+
+                <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 0;"></div>
+
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #fb923c;"
+                    onclick="addStamp('EXTRA PICK UP')">EXTRA PICK UP</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #34d399;"
+                    onclick="addStamp('EXTRA DELIVERY')">EXTRA DELIVERY</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #f472b6;"
+                    onclick="addStamp('NO CHARGE')">NO
+                    CHARGE</button>
+                <button type="button" class="stamp-tool-btn" style="border-left: 5px solid #60a5fa;"
+                    onclick="addStamp('PARTIAL PAYMENT')">PARTIAL PAYMENT</button>
+            </div>
+        </div>
+
+        <!-- Weekly Vault -->
+        <div id="vault-modal" class="modal-overlay" style="display: none; z-index: 8100;">
+            <div class="modal-content glass"
+                style="max-width: 600px; width: 95%; padding: 0; border: 2px solid #0ea5e9; border-radius: 16px; overflow: hidden;">
+                <div class="popup-header"
+                    style="background: rgba(15, 23, 42, 0.95); padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color: white; margin: 0;">Weekly Vault</h3>
+                    <button type="button" id="close-vault" style="background:none; border:none; color:white; cursor:pointer;"><i
+                            data-lucide="x"></i></button>
+                </div>
+                <div style="padding: 1rem; background: rgba(15, 23, 42, 0.9);">
+                    <div id="vault-undo-container"></div>
+                    <div id="vault-list" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Share Modal -->
+        <div id="share-modal" class="modal-overlay" style="display: none; z-index: 8200;">
+            <div class="modal-content glass"
+                style="max-width: 400px; width: 90%; padding: 0; border: 2px solid #0ea5e9; border-radius: 16px; overflow: hidden;">
+                <div class="popup-header"
+                    style="background: rgba(15, 23, 42, 0.95); padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: white; margin: 0;">Share Load</h3>
+                    <button type="button" id="close-share" style="background:none; border:none; color:white; cursor:pointer;"
+                        onclick="document.getElementById('share-modal').style.display='none'">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                <div style="padding: 1.25rem; background: rgba(15, 23, 42, 0.9);">
+                    <!-- Packet Naming -->
+                    <div style="margin-bottom: 1.5rem;">
+
+                        <input type="text" id="share-packet-name" placeholder="Columbia_Load_Packet"
+                            style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; color: white; outline: none; font-size: 14px;">
+                    </div>
+
+                    <!-- Format Selection -->
+                    <div style="margin-bottom: 1.25rem;">
+
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                            <button type="button" id="btn-fmt-pdf" onclick="window.setShareFormat('pdf')"
+                                style="background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 7px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">PDF
+                                Packet</button>
+                            <button type="button" id="btn-fmt-img" onclick="window.setShareFormat('image')"
+                                style="background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.15); padding: 10px; border-radius: 7px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">Single
+                                Image</button>
+                        </div>
+                    </div>
+
+                    <!-- Sending Methods -->
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button type="button" class="tool-btn btn-premium" id="btn-share-finish" onclick="submitToOffice()"
+                            style="width: 100%; justify-content: center; background: var(--primary); color: white; height: 52px; font-size: 16px; margin-bottom: 0.5rem; border-radius: 12px; opacity: 0.6; pointer-events: none;">
+                            <i data-lucide="send" style="width: 18px; margin-right: 8px;"></i>
+                            SUBMIT TO OFFICE <span class="coming-soon-badge">COMING SOON</span>
+                        </button>
+
+                        <button type="button" class="tool-btn" onclick="shareTo('gmail')"
+                            style="width: 100%; justify-content: center; background: #ef4444; color: white; height: 48px; font-size: 15px;">Send
+                            to Gmail</button>
+                        <button type="button" class="tool-btn" onclick="shareTo('sms')"
+                            style="width: 100%; justify-content: center; background: #22c55e; color: white; height: 48px; font-size: 15px;">SMS
+                            / My Contacts</button>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.25rem;">
+                            <button type="button" class="tool-btn" onclick="shareTo('download')"
+                                style="justify-content: center; font-size: 12px; background: rgba(255,255,255,0.05); color: white;"><i
+                                    data-lucide="download" style="width:16px; margin-right: 6px;"></i>
+                                Download</button>
+                            <button type="button" class="tool-btn" onclick="shareTo('copy')"
+                                style="justify-content: center; font-size: 12px; background: rgba(255,255,255,0.05); color: white;"><i
+                                    data-lucide="external-link" style="width:16px; margin-right: 6px;"></i> Copy
+                                Link</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Digital Signature -->
+        <div id="sign-modal" class="modal-overlay" style="display: none; z-index: 9500;">
+            <div class="modal-content glass"
+                style="max-width: 500px; width: 90%; padding: 0; border: 2px solid #0ea5e9; border-radius: 16px; overflow: hidden;">
+                <div class="popup-header"
+                    style="background: rgba(15, 23, 42, 0.95); padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: white; margin: 0;">Digital Signature</h3>
+                    <button type="button" id="close-sign" style="background:none; border:none; color:white; cursor:pointer;"><i
+                            data-lucide="x"></i></button>
+                </div>
+                <div style="padding: 1.5rem; background: rgba(15, 23, 42, 0.9);">
+                    <div
+                        style="background: white; border-radius: 12px; height: 260px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1);">
+                        <canvas id="sig-canvas" style="width: 100%; height: 100%; touch-action: none;"></canvas>
+                    </div>
+                    <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <button type="button" class="tool-btn" id="btn-clear-sig"
+                            style="height: 50px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white;">Clear</button>
+                        <button type="button" class="tool-btn active" id="btn-save-sig"
+                            style="height: 50px; border-radius: 12px; background: #0ea5e9; color: white; border: none; font-weight: 700;">Apply
+                            Signature</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full-Screen Preview -->
+        <div id="attachment-preview-modal" class="modal-overlay" style="display: none; z-index: 8400;">
+            <div class="preview-content glass"
+                style="width: 90%; height: 90%; position: relative; display: flex; flex-direction: column; padding: 0; border: 2px solid #0ea5e9; border-radius: 16px; overflow: hidden;">
+                <div class="popup-header"
+                    style="background: rgba(15, 23, 42, 0.95); padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: white; margin: 0;">Document Preview</h3>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button type="button" id="btn-edit-in-main" class="tool-btn active"
+                            style="width: auto; padding: 0.5rem 1.5rem; flex-direction: row; background: #0ea5e9; border: none; border-radius: 10px; font-size: 13px; font-weight: 800; color: #ffffff; height: 40px; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);">
+                            <i data-lucide="edit-2" style="width:16px; margin-right: 8px;"></i> EDIT IN MAIN
+                        </button>
+                        <button type="button" id="close-preview" style="background:none; border:none; color:white; cursor:pointer;"><i
+                                data-lucide="x" style="width:24px; height:24px;"></i></button>
+                    </div>
+                </div>
+                <div id="preview-body"
+                    style="flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; background: #0f172a; padding: 1rem;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Mobile Toggle -->
+        <button type="button" id="btn-mobile-fab" class="fab-toggle" title="Toggle Mobile/Desktop View"
+            style="display:flex !important;">
+            <i data-lucide="smartphone"></i>
+        </button>
+
+        <!-- Route Map Modal -->
+        <div id="route-map-modal"
+            style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:7000; flex-direction:column; align-items:center; justify-content:center;">
+            <div
+                style="background:#0f172a; border:2px solid #0ea5e9; border-radius:16px; width:95%; max-width:700px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 40px rgba(14,165,233,0.3);">
+                <div
+                    style="padding:1rem 1.25rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color:white; margin:0; font-size:1rem;">ðŸ“ Route Map</h3>
+                    <button type="button" id="close-route-map"
+                        style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">âœ•</button>
+                </div>
+                <div id="route-status"
+                    style="padding:0.75rem 1.25rem; background:rgba(14,165,233,0.1); font-size:13px; color:#93c5fd; border-bottom:1px solid rgba(255,255,255,0.05); min-height:40px;">
+                    Enter addresses in the New Load form and tap Show Route.
+                </div>
+                <div id="leaflet-map" style="flex:1; min-height:350px; width:100%;"></div>
+                <div
+                    style="padding:1rem 1.25rem; display:flex; gap:1rem; justify-content:flex-end; align-items:center; border-top:1px solid rgba(255,255,255,0.1);">
+                    <span id="route-miles-display"
+                        style="color:#34d399; font-weight:700; font-size:1rem; flex:1;"></span>
+                    <button type="button" id="btn-use-route"
+                        style="background:#0ea5e9; color:white; border:none; border-radius:10px; padding:0.65rem 1.5rem; font-weight:700; cursor:pointer; display:none;">âœ“
+                        Use This Route</button>
+                    <button type="button" id="close-route-map2"
+                        style="background:rgba(255,255,255,0.05); color:white; border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:0.65rem 1.5rem; font-weight:700; cursor:pointer;">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Camera Scanner -->
+        <div id="camera-modal" class="modal-overlay" style="display: none; z-index: 8500;">
+            <div class="modal-content glass"
+                style="max-width: 500px; width: 90%; padding: 0; border: 2px solid #0ea5e9; border-radius: 16px; overflow: hidden;">
+                <div class="popup-header"
+                    style="background: rgba(15, 23, 42, 0.95); padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="color: white; margin: 0;">Scan Document</h3>
+                    <button type="button" id="close-camera" style="background:none; border:none; color:white; cursor:pointer;"><i
+                            data-lucide="x"></i></button>
+                </div>
+                <div style="padding: 1.5rem; background: rgba(15, 23, 42, 0.9);">
+                    <video id="video-preview" autoplay playsinline
+                        style="width: 100%; border-radius: 12px; background: black;"></video>
+                    <button type="button" id="btn-capture" class="tool-btn active"
+                        style="margin-top: 1.5rem; height: 60px; border-radius: 30px; background: #0ea5e9; width: 100%; border: none; font-weight: 700; color: white;">Capture
+                        Document</button>
+                </div>
+
+
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+                <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+                <script>
+
+// --- WIX INJECTED WORKER CONFIG ---
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+} else if (window.pdfjsLib) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+// ----------------------------------
+// Stability: Global Error Catcher
+window.onerror = function (msg, url, line, col, error) {
+    console.error("GLOBAL ERROR:", msg, url, line, col, error);
+    var banner = document.getElementById('debug-error-banner');
+    if (banner) {
+        banner.style.display = 'block';
+        var detail = error && error.stack ? error.stack : (msg + " at " + line + ":" + col);
+        banner.innerHTML = "<strong>FATAL ERROR:</strong><br>" + detail;
+    }
+    return false;
+};
+
+// Configure PDF.js worker
+var currentPdf = null;
+var currentPdfBytes = null; // Track raw bytes for Vault
+var scale = 1.5;
+var currentPage = 1;
+
+var activeTrip = null;
+var selectedTool = null;
+var annotations = [];
+var isDragging = false;
+var dragTarget = null;
+var dragOffset = { x: 0, y: 0 };
+
+// Grading Pen State
+var isDrawing = false;
+var currentStroke = null;
+
+// Attachment Editing Context
+var stateStack = []; // Stack of { bytes, doc, annos, type, currentFileContext, sessionVaultId }
+var currentFileContext = null; // Reference to the file object in activeAnno.files if editing an attachment
+
+// Session Management: Prevent Vault Bloat
+var sessionVaultId = null;
+var autoSaveTimer = null;
+var lastDeletedVaultItem = null; // Memory store for Vault Undo feature
+
+function getEventCoords(e, container) {
+    var canvas = container.querySelector('canvas');
+    if (!canvas) return { x: 0, y: 0, nx: 0, ny: 0 };
+    var rect = canvas.getBoundingClientRect();
+
+    var clientX = e.clientX;
+    var clientY = e.clientY;
+
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+    }
+
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+
+    var x = (clientX - rect.left) * scaleX;
+    var y = (clientY - rect.top) * scaleY;
+
+    return {
+        x: x,
+        y: y,
+        nx: x / canvas.width,
+        ny: y / canvas.height
+    };
+}
+
+function getCanvasCenter() {
+    var container = document.getElementById('pdf-canvas-container');
+    if (!container) return { x: 300, y: 400, nx: 0.5, ny: 0.5 };
+    var rect = container.getBoundingClientRect();
+
+    // Calculate center of the visible container
+    var centerX = rect.left + (rect.width / 2);
+    var centerY = rect.top + (rect.height / 2);
+
+    return getEventCoords({ clientX: centerX, clientY: centerY }, container);
+}
+
+// Global Element References (Initialized in initButtons for safety)
+var startOverlay, startBtn, driverInput, finishBtn, importBtn, canvasContainer, loadEntryModal, vaultModal, popup, closePopupBtn, shareModal;
+var activeAnno = null;
+
+// 1. INITIALIZATION & BUTTONS
+function initButtons() {
+    try {
+        console.log("initButtons: Starting initialization...");
+
+        startOverlay = document.getElementById('start-overlay');
+        startBtn = document.getElementById('btn-start-trip');
+        driverInput = document.getElementById('driver-name');
+        finishBtn = document.getElementById('btn-finish');
+        importBtn = document.getElementById('btn-import');
+        canvasContainer = document.getElementById('pdf-canvas-container');
+        loadEntryModal = document.getElementById('load-entry-modal');
+        vaultModal = document.getElementById('vault-modal');
+        popup = document.getElementById('attachment-popup');
+        closePopupBtn = document.getElementById('close-popup');
+        shareModal = document.getElementById('share-modal');
+        var btnSaveForm = document.getElementById('btn-save-load');
+
+        // Check for Shared Files from PWA Share Target
+        if (window.location.search.includes('shared=1')) {
+            (async () => {
+                try {
+                    var cache = await caches.open('shared-files');
+                    var resp = await cache.match('/last-shared-file');
+                    if (resp) {
+                        var blob = await resp.blob();
+                        var type = blob.type || 'application/pdf';
+                        console.log("PWA Share Target: Received file of type", type);
+                        if (confirm("Received external edits! Would you like to load them into the current session?")) {
+                            await loadDocument(blob, type);
+                            await cache.delete('/last-shared-file');
+                            // Clean URL
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Share Target Error:", e);
+                }
+            })();
+        }
+
+        if (!startBtn || !startOverlay) {
+            console.warn("Init: Core elements missing.");
+            return;
+        }
+
+        // Use native addEventListener to bypass Wix stripping inline onclick attributes
+        window.handleStartTrip = () => {
+            var driverId = driverInput ? driverInput.value.trim() : '';
+            if (!driverId) {
+                alert("Please enter Driver/Company ID to begin.");
+                return;
+            }
+            activeTrip = {
+                driver: driverId,
+                startTime: new Date().toISOString(),
+                inv: "N/A",
+                stop: "01",
+                logs: []
+            };
+
+            // Create a fresh vault session for this shift
+            sessionVaultId = 'session_' + Date.now();
+
+            startOverlay.style.display = 'none';
+
+            // Re-render empty state text if no document loaded yet
+            if (!currentPdfBytes && window.innerWidth >= 769) {
+                // Silently clear state or wait for import
+            }
+        };
+
+        // Physically attach the event listener, preventing duplicate bindings
+        startBtn.removeEventListener('click', window.handleStartTrip);
+        startBtn.addEventListener('click', window.handleStartTrip);
+
+        // Tool selection
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            if (btn.getAttribute('onclick')) return; // DON'T overwrite if already has handler
+            btn.onclick = (e) => {
+                var ignore = ['btn-save', 'btn-import', 'btn-finish', 'btn-reset', 'btn-start-trip', 'btn-clear-sig', 'btn-save-sig', 'btn-zoom-in', 'btn-zoom-out', 'btn-demo', 'btn-scan-camera', 'btn-upload-file', 'btn-manual-load', 'btn-vault', 'btn-save-load', 'btn-share', 'btn-reset-view', 'btn-mobile-toggle', 'btn-mobile-fab', 'btn-undo', 'btn-quick-scan', 'btn-route-map', 'btn-show-route'];
+                if (ignore.includes(btn.id)) return;
+
+                if (btn.classList.contains('active')) {
+                    btn.classList.remove('active');
+                    selectedTool = null;
+                } else {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    if (btn.id === 'btn-text') selectedTool = 'text';
+                    else if (btn.id === 'btn-attach') selectedTool = 'attach';
+                    else if (btn.id === 'btn-stamp') selectedTool = 'stamp';
+                    else if (btn.id === 'btn-sign') selectedTool = 'sign';
+                    else if (btn.id === 'btn-pen') selectedTool = 'pen';
+                    else if (btn.id === 'btn-eraser') selectedTool = 'eraser';
+
+                    // Auto-close any open overlay/popup when switching tools
+                    if (popup) {
+                        popup.style.display = 'none';
+                        activeAnno = null; // Clear context if switching tools
+                    }
+                    var sPicker = document.getElementById('stamp-picker');
+                    if (sPicker) sPicker.style.display = 'none';
+
+                    // Center Staging: Spawn in center immediately
+                    if (['btn-text', 'btn-stamp', 'btn-sign', 'btn-attach'].includes(btn.id)) {
+                        var center = getCanvasCenter();
+                        if (btn.id === 'btn-stamp') openStampPicker(center.nx, center.ny);
+                        else if (btn.id === 'btn-sign') openSignatureModal(center.nx, center.ny);
+                        else if (btn.id === 'btn-text') {
+                            var t = prompt("Enter Blue Text:");
+                            if (t) {
+                                annotations.push({ type: 'text', x: center.nx, y: center.ny, content: t, id: Date.now() });
+                                drawAnnotations();
+                                saveToVault(); // AUTO-SAVE after text
+                            }
+                        } else if (btn.id === 'btn-attach') {
+                            var a = { type: 'attach', x: center.nx, y: center.ny, files: [], id: Date.now(), name: 'New Attachment' };
+                            annotations.push(a); openPopup(a); drawAnnotations();
+                            saveToVault(); // AUTO-SAVE new attachment point
+                        }
+                    }
+                }
+            };
+        });
+
+        // Sidebar Special Buttons
+        var searchInput = document.getElementById('header-search');
+        if (searchInput) {
+            searchInput.oninput = () => {
+                var query = searchInput.value.toLowerCase();
+                var items = document.querySelectorAll('.vault-item');
+                items.forEach(item => {
+                    var text = item.innerText.toLowerCase();
+                    item.style.display = text.includes(query) ? 'flex' : 'none';
+                });
+            };
+        }
+
+
+        var btnUndo = document.getElementById('btn-undo');
+        if (btnUndo) {
+            btnUndo.onpointerdown = (e) => { e.stopPropagation(); };
+            btnUndo.onclick = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("Undo: Removing last pen stroke...");
+                var found = false;
+                for (var i = annotations.length - 1; i >= 0; i--) {
+                    if (annotations[i].type === 'pen') {
+                        annotations.splice(i, 1);
+                        await window.redrawBaseDocument();
+                        drawAnnotations();
+                        saveToVault(null, true);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    alert("No pen strokes to undo.");
+                }
+            };
+        }
+
+        // Helper to clear canvas ink when deleting strokes
+        window.redrawBaseDocument = async () => {
+            if (currentPdf) await renderPage(currentPage);
+            else if (currentPdfBytes) {
+                if (currentDocType.startsWith('image/')) await renderImage(currentPdfBytes);
+                else if (currentDocType.includes('text/plain')) await renderTextDocument(currentPdfBytes);
+            }
+        };
+
+        window.isErasing = false;
+        window.handleEraser = async (p) => {
+            if (window.isErasing) return;
+            window.isErasing = true;
+            var mainCanvas = canvasContainer.querySelector('canvas');
+            if (!mainCanvas) { window.isErasing = false; return; }
+            var found = false;
+            for (var i = annotations.length - 1; i >= 0; i--) {
+                var a = annotations[i];
+                if (a.type !== 'pen') continue;
+                for (var pt of a.points) {
+                    var px = p.nx * mainCanvas.width;
+                    var py = p.ny * mainCanvas.height;
+                    var ptx = pt.nx * mainCanvas.width;
+                    var pty = pt.ny * mainCanvas.height;
+                    if (Math.hypot(px - ptx, py - pty) < 25) { // 25px forgiving eraser radius
+                        annotations.splice(i, 1);
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break; // Only erase one stroke per interaction frame for performance
+            }
+            if (found) {
+                await window.redrawBaseDocument();
+                drawAnnotations();
+                saveToVault(null, true);
+            }
+            window.isErasing = false;
+        };
+
+        var btnManual = document.getElementById('btn-manual-load');
+        if (btnManual) btnManual.onclick = () => {
+            console.log("New Load: Showing form...");
+            // DO NOT resetView here anymore - var user choose to clear or keep work
+
+
+            // 2. Clear all form inputs
+            var inputs = ['manual-inv', 'manual-po', 'manual-load', 'manual-order', 'manual-truck', 'manual-trailer',
+                'manual-driver-id', 'manual-payment', 'manual-billed-to', 'manual-from', 'manual-to',
+                'manual-details', 'manual-miles', 'manual-notes', 'manual-total'];
+            inputs.forEach(id => {
+                var el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+
+            // 3. Show the modal
+            loadEntryModal.style.display = 'flex';
+        };
+
+        var btnVault = document.getElementById('btn-vault');
+        if (btnVault) btnVault.onclick = () => { // Changed to onclick
+            vaultModal.style.display = 'flex';
+            renderVault();
+        };
+
+        var btnShare = document.getElementById('btn-share');
+        if (btnShare) btnShare.onclick = () => { // Changed to onclick
+            if (!currentPdfBytes) return alert("Please load a document first.");
+            shareModal.style.display = 'flex';
+            window.setShareFormat('pdf'); // Set default format to PDF
+        };
+
+        var btnReset = document.getElementById('btn-reset-view');
+        if (btnReset) btnReset.onclick = resetView; // Changed to onclick
+
+        // Lifecycle
+        startBtn.onclick = window.handleStartTrip; // Changed to onclick
+
+        if (finishBtn) {
+            finishBtn.onclick = async () => {
+                if (!currentPdfBytes) return alert("Please import or generate a load first.");
+
+                // Check if we are in Attachment Editing Mode
+                if (currentFileContext && stateStack.length > 0) {
+                    if (!confirm("Save these annotations to the attachment?")) return;
+
+                    try {
+                        var originalFormat = shareFormat;
+                        shareFormat = 'image'; // Force image format for attachment thumbnails
+
+                        // FIX: Must BAKE the packet to include floating stamps/signatures!
+                        var blobOrUrl = await bakeFullPacket(true); // pass true to get direct dataUrl
+                        shareFormat = originalFormat; // restore
+
+                        if (blobOrUrl) {
+                            currentFileContext.data = blobOrUrl;
+                            currentFileContext.type = 'image/jpeg';
+                            currentFileContext.annotated = true;
+
+                            alert("Success! Changes saved to attachment.");
+
+                            var prevState = stateStack.pop();
+                            currentPdfBytes = prevState.bytes;
+                            currentPdf = prevState.doc;
+                            annotations = prevState.annos;
+                            currentDocType = prevState.type;
+                            currentFileContext = null;
+
+                            if (currentPdf) await renderPage(currentPage);
+                            else if (currentPdfBytes) {
+                                if (currentDocType.startsWith('image/')) await renderImage(currentPdfBytes);
+                                else if (currentDocType.includes('text/plain')) await renderTextDocument(currentPdfBytes);
+                            }
+
+                            drawAnnotations();
+                            finishBtn.innerHTML = `<i data-lucide="send"></i> Finish & Submit`;
+                            if (window.lucide) lucide.createIcons();
+
+                            saveToVault(null, true); // ALWAYS AUTO-SAVE
+                        }
+                    } catch (e) {
+                        console.error("Attachment Save Fail:", e);
+                        alert("Failed to save attachment edits: " + e.message);
+                    }
+                    return;
+                }
+
+                var defaultName = activeTrip && activeTrip.inv ? activeTrip.inv : "Daily Load Packet";
+                var customName = prompt("Enter a name for this Load Packet:", "");
+                if (customName === null) return;
+                saveToVault(customName.trim() || defaultName, true); // IMMEDIATE SAVE
+                resetView(true); // Auto-reset after finish
+            };
+        }
+
+        var btnEditInMain = document.getElementById('btn-edit-in-main');
+        if (btnEditInMain) {
+            btnEditInMain.onclick = async () => {
+                var previewModal = document.getElementById('attachment-preview-modal');
+                if (!currentPreviewFile) return;
+
+                // Save current state to stack before switching
+                stateStack.push({
+                    bytes: currentPdfBytes,
+                    doc: currentPdf,
+                    annos: [...annotations],
+                    type: currentDocType || 'application/pdf',
+                    context: currentFileContext,
+                    sessionVaultId: sessionVaultId
+                });
+
+                // Load attachment into main
+                console.log("Switching to Attachment Edit Mode...");
+                annotations = [];
+                currentFileContext = currentPreviewFile;
+                // DO NOT reset sessionVaultId - we want to update the same session entry if possible, 
+                // but child edits are volatile until baked into parent.
+
+                var data = currentPreviewFile.data;
+                // If it's a PDF and we have raw bytes, use them
+                if (currentPreviewFile.type === 'application/pdf' && typeof data === 'string' && data.includes('base64,')) {
+                    data = base64ToBytes(data.split('base64,')[1]);
+                }
+
+                await loadDocument(data, currentPreviewFile.type);
+                previewModal.style.display = 'none';
+                popup.style.display = 'none'; // Also hide the point popup
+
+                // Update Finish button label
+                if (finishBtn) {
+                    finishBtn.innerHTML = `<i data-lucide="save"></i> Save to Attachment`;
+                    if (window.lucide) lucide.createIcons();
+                }
+
+                alert(`Now editing: ${currentPreviewFile.name}\nUse the sidebar tools to annotate. Click "Save to Attachment" when done.`);
+            };
+        }
+
+        var btnReturn = document.getElementById('btn-reset-view');
+        if (btnReturn) {
+            btnReturn.onclick = () => {
+                if (stateStack.length > 0) {
+                    if (confirm("Discard edits and return to main document?")) {
+                        var prevState = stateStack.pop();
+                        currentPdfBytes = prevState.bytes;
+                        currentPdf = prevState.doc;
+                        annotations = prevState.annos;
+                        currentDocType = prevState.type;
+                        currentFileContext = prevState.context;
+                        sessionVaultId = prevState.sessionVaultId;
+
+                        if (currentPdf) renderPage(currentPage);
+                        else if (currentPdfBytes) {
+                            if (currentDocType.startsWith('image/')) renderImage(currentPdfBytes);
+                            else if (currentDocType.includes('text/plain')) renderTextDocument(currentPdfBytes);
+                        }
+
+                        drawAnnotations();
+                        if (finishBtn) {
+                            finishBtn.innerHTML = `<i data-lucide="send"></i> Finish & Submit`;
+                            if (window.lucide) lucide.createIcons();
+                        }
+                    }
+                } else {
+                    resetView();
+                }
+            };
+        }
+
+        var closePreview = document.getElementById('close-preview');
+        if (closePreview) closePreview.onclick = () => {
+            document.getElementById('attachment-preview-modal').style.display = 'none';
+        };
+
+        if (importBtn) {
+            importBtn.onclick = () => {
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'application/pdf,image/*,text/plain';
+                input.onchange = async (e) => {
+                    var file = e.target.files[0];
+                    if (file) {
+                        var type = getMimeByType(file);
+                        var reader = new FileReader();
+                        reader.onload = async (re) => {
+                            var data = re.target.result;
+                            if (!(type.startsWith('image/') || type === 'text/plain')) data = new Uint8Array(data);
+                            annotations = [];
+                            await loadDocument(data, type);
+                            ensureDefaultDots(true); // Add specialized dots on import
+                        };
+                        if (type.startsWith('image/') || type === 'text/plain') reader.readAsDataURL(file);
+                        else reader.readAsArrayBuffer(file);
+                    }
+                };
+                input.click();
+            };
+        }
+
+        // --- DRAG & DROP SUPPORT ---
+        // Global prevention to stop browser from opening files in new tab
+        window.addEventListener('dragover', (e) => e.preventDefault());
+        window.addEventListener('drop', (e) => e.preventDefault());
+
+        if (canvasContainer) {
+            canvasContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                canvasContainer.style.borderColor = '#0ea5e9';
+                canvasContainer.style.background = 'rgba(14, 165, 233, 0.05)';
+            });
+            canvasContainer.addEventListener('dragleave', () => {
+                canvasContainer.style.borderColor = 'var(--border)';
+                canvasContainer.style.background = 'transparent';
+            });
+            canvasContainer.addEventListener('drop', async (e) => {
+                e.preventDefault();
+                canvasContainer.style.borderColor = 'var(--border)';
+                canvasContainer.style.background = 'transparent';
+
+                var file = e.dataTransfer.files[0];
+                if (file) {
+                    var type = getMimeByType(file);
+                    console.log("Dropped file detected:", file.name, type);
+                    var reader = new FileReader();
+                    reader.onload = async (re) => {
+                        var data = re.target.result;
+                        if (!(type.startsWith('image/') || type === 'text/plain')) data = new Uint8Array(data);
+                        annotations = [];
+                        await loadDocument(data, type);
+                    };
+                    if (type.startsWith('image/') || type === 'text/plain') reader.readAsDataURL(file);
+                    else reader.readAsArrayBuffer(file);
+                    ensureDefaultDots(true); // Add specialized dots on drop
+                }
+            });
+        }
+
+        if (btnSaveForm) {
+            btnSaveForm.onclick = async () => {
+                try {
+                    console.log("Generating Manual PDF: Start");
+                    var inv = document.getElementById('manual-inv')?.value || "M-" + Date.now();
+                    var po = document.getElementById('manual-po')?.value || "N/A";
+                    var loadNum = document.getElementById('manual-load')?.value || "N/A";
+                    var orderNum = document.getElementById('manual-order')?.value || "N/A";
+                    var billedFull = document.getElementById('manual-billed-to')?.value || "N/A";
+                    // Split billedFull into name and address if possible (e.g. by comma)
+                    var billedTo = "N/A";
+                    var billedAddr = "N/A";
+                    if (billedFull !== "N/A") {
+                        var billedSplit = billedFull.split(',');
+                        billedTo = billedSplit[0].trim();
+                        billedAddr = billedSplit.length > 1 ? billedSplit.slice(1).join(',').trim() : "N/A";
+                    }
+
+                    var from = document.getElementById('manual-from')?.value || "N/A";
+                    var to = document.getElementById('manual-to')?.value || "N/A";
+                    var truck = document.getElementById('manual-truck')?.value || "N/A";
+                    var trailer = document.getElementById('manual-trailer')?.value || "N/A";
+                    var driverId = document.getElementById('manual-driver-id')?.value || "N/A";
+                    var payment = document.getElementById('manual-payment')?.value || "N/A";
+                    var driver = (activeTrip ? activeTrip.driver : "Driver");
+                    var date = new Date().toLocaleDateString();
+                    var terms = payment; // Use payment field for Terms
+                    var details = document.getElementById('manual-details')?.value || "N/A";
+                    var miles = document.getElementById('manual-miles')?.value || "N/A";
+                    var notes = document.getElementById('manual-notes')?.value || "N/A";
+                    var total = document.getElementById('manual-total')?.value || "0.00";
+
+                    // Ensure activeTrip is consistent
+                    activeTrip = activeTrip || { driver: driver, startTime: new Date() };
+                    activeTrip.inv = inv;
+                    activeTrip.load = loadNum;
+                    activeTrip.order = orderNum;
+
+                    // Clear previous doc data to avoid ghosting
+                    currentPdfBytes = null;
+                    currentPdf = null;
+
+                    btnSaveForm.innerText = "GENERATING...";
+                    btnSaveForm.disabled = true;
+
+                    if (typeof PDFLib === 'undefined') {
+                        var msg = "PDF library not loaded. Please refresh or check your connection.";
+                        console.error(msg);
+                        alert(msg);
+                        btnSaveForm.innerText = "Create Shipment";
+                        btnSaveForm.disabled = false;
+                        return;
+                    }
+
+                    var pdfDoc = await PDFLib.PDFDocument.create();
+                    var page = pdfDoc.addPage([600, 800]);
+                    var { rgb, StandardFonts } = PDFLib;
+                    var fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+                    var fontReg = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+                    // Header & Branding
+                    page.drawRectangle({ x: 0, y: 700, width: 600, height: 100, color: rgb(0.06, 0.09, 0.16) });
+                    page.drawText("BILL OF LADING / INVOICE", { x: 40, y: 755, size: 24, font: fontBold, color: rgb(1, 1, 1) });
+
+                    var prefixText = "Date,Name of PaperWork and Job ID#: ";
+                    var prefixSize = 10;
+                    page.drawText(prefixText, { x: 40, y: 730, size: prefixSize, font: fontBold, color: rgb(0.05, 0.65, 0.9) });
+                    var prefixWidth = fontBold.widthOfTextAtSize(prefixText, prefixSize);
+                    page.drawText(inv, { x: 40 + prefixWidth, y: 730, size: prefixSize, font: fontBold, color: rgb(1, 1, 1) });
+
+                    page.drawText("COLUMBIA TRANSPORT LLC LOGISTICS PORTAL", { x: 350, y: 755, size: 10, font: fontBold, color: rgb(0.05, 0.65, 0.9) });
+                    page.drawText("Automated Payload System", { x: 400, y: 740, size: 9, font: fontReg, color: rgb(0.6, 0.6, 0.6) });
+
+                    // Data Grid - Section 1: Parties
+                    page.drawText("BILL TO:", { x: 40, y: 670, size: 10, font: fontBold, color: rgb(0.05, 0.65, 0.9) });
+                    page.drawText(billedTo, { x: 40, y: 655, size: 12, font: fontBold });
+                    page.drawText(billedAddr, { x: 40, y: 640, size: 9, font: fontReg, color: rgb(0.3, 0.3, 0.3) });
+
+                    page.drawText("CARRIER DETAILS:", { x: 300, y: 670, size: 10, font: fontBold, color: rgb(0.05, 0.65, 0.9) });
+                    page.drawText(`Driver: ${driver} (${driverId})`, { x: 300, y: 655, size: 10, font: fontReg });
+                    page.drawText(`Truck: ${truck} | Trailer: ${trailer}`, { x: 300, y: 640, size: 10, font: fontReg });
+                    page.drawText(`Payment: ${payment}`, { x: 300, y: 625, size: 10, font: fontReg });
+
+                    // Section 2: Reference & Dates
+                    page.drawRectangle({ x: 40, y: 560, width: 520, height: 65, color: rgb(0.96, 0.97, 0.99) });
+                    // Row 1
+                    page.drawText("CUST PO / REF", { x: 50, y: 612, size: 8, font: fontBold, color: rgb(0.5, 0.5, 0.5) });
+                    page.drawText(po, { x: 50, y: 598, size: 10, font: fontReg });
+
+                    page.drawText("DATE", { x: 200, y: 612, size: 8, font: fontBold, color: rgb(0.5, 0.5, 0.5) });
+                    page.drawText(date, { x: 200, y: 598, size: 10, font: fontReg });
+
+                    page.drawText("TERMS", { x: 350, y: 612, size: 8, font: fontBold, color: rgb(0.5, 0.5, 0.5) });
+                    page.drawText(terms, { x: 350, y: 598, size: 10, font: fontReg });
+
+                    // Row 2
+                    page.drawText("LOAD #", { x: 50, y: 580, size: 8, font: fontBold, color: rgb(0.5, 0.5, 0.5) });
+                    page.drawText(loadNum, { x: 50, y: 566, size: 10, font: fontReg });
+
+                    page.drawText("ORDER #", { x: 200, y: 580, size: 8, font: fontBold, color: rgb(0.5, 0.5, 0.5) });
+                    page.drawText(orderNum, { x: 200, y: 566, size: 10, font: fontReg });
+
+                    page.drawText("MILES", { x: 350, y: 580, size: 8, font: fontBold, color: rgb(0.5, 0.5, 0.5) });
+                    page.drawText(miles, { x: 350, y: 566, size: 10, font: fontReg });
+
+                    // Section 3: Routes
+                    page.drawText("SHIPMENT PATH", { x: 40, y: 535, size: 10, font: fontBold, color: rgb(0.05, 0.65, 0.9) });
+                    page.drawText("FROM:", { x: 40, y: 520, size: 8, font: fontBold });
+                    page.drawText(from, { x: 40, y: 507, size: 11, font: fontReg });
+                    page.drawText("TO:", { x: 300, y: 520, size: 8, font: fontBold });
+                    page.drawText(to, { x: 300, y: 507, size: 11, font: fontReg });
+
+                    // Section 4: Items Table Header
+                    page.drawRectangle({ x: 40, y: 455, width: 520, height: 25, color: rgb(0.06, 0.09, 0.16) });
+                    page.drawText("DESCRIPTION OF ARTICLES / SPECIAL MARKS", { x: 50, y: 463, size: 9, font: fontBold, color: rgb(1, 1, 1) });
+
+                    // Item Row
+                    page.drawRectangle({ x: 40, y: 415, width: 520, height: 40, color: rgb(1, 1, 1), borderVisible: true, borderDark: true });
+                    page.drawText(details, { x: 50, y: 430, size: 12, font: fontReg });
+
+                    // Section 5: Notes & Total
+                    page.drawText("SPECIAL INSTRUCTIONS:", { x: 40, y: 385, size: 9, font: fontBold, color: rgb(0.4, 0.4, 0.4) });
+                    page.drawText(notes, { x: 40, y: 370, size: 10, font: fontReg, maxWidth: 300 });
+
+                    page.drawRectangle({ x: 380, y: 345, width: 180, height: 60, color: rgb(0.95, 0.98, 1) });
+                    page.drawText("TOTAL CHARGES", { x: 390, y: 390, size: 10, font: fontBold, color: rgb(0.05, 0.65, 0.9) });
+                    page.drawText(`$${total}`, { x: 390, y: 360, size: 22, font: fontBold, color: rgb(0.06, 0.09, 0.16) });
+
+                    // Legal Footer
+                    page.drawText("I hereby certify that the above named articles are properly classified and described.", { x: 40, y: 60, size: 8, font: fontReg, color: rgb(0.5, 0.5, 0.5) });
+
+                    var bytes = await pdfDoc.save();
+                    currentPdfBytes = bytes;
+                    annotations = [];
+
+                    // AUTO-SAVE TO VAULT FIRST (before loadDocument can detach the buffer)
+                    saveToVault(inv);
+
+                    await loadDocument(bytes, 'application/pdf');
+                    ensureDefaultDots(false); // Specialized dots for New Load papers
+                    drawAnnotations();
+                    saveToVault();
+
+                    if (loadEntryModal) loadEntryModal.style.display = 'none';
+                    console.log("Manual PDF Generation: Success & Auto-Saved.");
+                } catch (err) {
+                    console.error("Manual PDF Generation Fail:", err);
+                    alert("Error generating PDF: " + err.message);
+                } finally {
+                    btnSaveForm.innerText = "GENERATE LOAD PAPERWORK";
+                    btnSaveForm.disabled = false;
+                }
+            };
+        }
+
+        // Closer Handlers
+        ['close-vault', 'close-load', 'close-popup', 'close-share', 'close-stamps'].forEach(id => {
+            var el = document.getElementById(id);
+            if (el) el.onclick = () => {
+                var mod = id.includes('vault') ? vaultModal : id.includes('load') ? loadEntryModal : id.includes('popup') ? popup : id.includes('stamps') ? document.getElementById('stamp-picker') : document.getElementById('share-modal');
+                if (mod) mod.style.display = 'none';
+                if (id === 'close-popup') {
+                    activeAnno = null;
+                    saveToVault(); // AUTO-SAVE when closing the attachment point
+                }
+            };
+        });
+        var dotNameInput = document.getElementById('popup-dot-name');
+        if (dotNameInput) {
+            dotNameInput.oninput = (e) => {
+                if (activeAnno && activeAnno.type === 'attach') {
+                    activeAnno.name = e.target.value;
+                    drawAnnotations();
+                    saveToVault(); // AUTO-SAVE when renaming the dot
+                }
+            };
+        }
+
+        // Renaming Packet Sync
+        var packetNameInput = document.getElementById('share-packet-name');
+        if (packetNameInput) {
+            packetNameInput.oninput = (e) => {
+                if (activeTrip) {
+                    activeTrip.inv = e.target.value;
+                    saveToVault();
+                }
+            };
+        }
+
+        // Attachment Actions (Scan & Upload) - REAL CAMERA IMPLEMENTATION
+        var btnScan = document.getElementById('btn-scan-camera');
+        if (btnScan) {
+            btnScan.onclick = async () => {
+                var modal = document.getElementById('camera-modal');
+                var video = document.getElementById('video-preview');
+                var captureBtn = document.getElementById('btn-capture');
+                var closeBtn = document.getElementById('close-camera');
+
+                try {
+                    var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    video.srcObject = stream;
+                    modal.style.display = 'flex';
+
+                    captureBtn.onclick = () => {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas.getContext('2d').drawImage(video, 0, 0);
+                        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                        if (activeAnno && activeAnno.type === 'attach') {
+                            activeAnno.files.push({ type: 'image/jpeg', name: 'Scan_' + Date.now() + '.jpg', data: dataUrl });
+                            renderFileList();
+                            saveToVault(); // AUTO-SAVE after scan capture
+                        }
+
+                        stream.getTracks().forEach(t => t.stop());
+                        modal.style.display = 'none';
+                    };
+
+                    closeBtn.onclick = () => {
+                        stream.getTracks().forEach(t => t.stop());
+                        modal.style.display = 'none';
+                    };
+                } catch (err) {
+                    console.error("Camera access denied:", err);
+                    alert("Could not access camera: " + err.message);
+                }
+            };
+        }
+
+        // ---- QUICK SCAN BUTTON ----
+        // Opens rear camera, captures image, loads directly into the main viewer
+        var btnQuickScan = document.getElementById('btn-quick-scan');
+        if (btnQuickScan) {
+            btnQuickScan.onclick = async () => {
+                var modal = document.getElementById('camera-modal');
+                var video = document.getElementById('video-preview');
+                var captureBtn = document.getElementById('btn-capture');
+                var closeBtn = document.getElementById('close-camera');
+
+                // Update button label for context
+                captureBtn.textContent = 'Capture & Load';
+
+                try {
+                    var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                    video.srcObject = stream;
+                    modal.style.display = 'flex';
+
+                    var doCapture = async () => {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas.getContext('2d').drawImage(video, 0, 0);
+                        var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+                        stream.getTracks().forEach(t => t.stop());
+                        modal.style.display = 'none';
+                        captureBtn.textContent = 'Capture';
+
+                        // Load the scan directly into the main viewer
+                        annotations = [];
+                        await loadDocument(dataUrl, 'image/jpeg');
+                        saveToVault();
+                    };
+
+                    captureBtn.onclick = doCapture;
+                    closeBtn.onclick = () => {
+                        stream.getTracks().forEach(t => t.stop());
+                        modal.style.display = 'none';
+                        captureBtn.textContent = 'Capture';
+                    };
+                } catch (err) {
+                    console.error('Quick Scan camera error:', err);
+                    alert('Could not access camera: ' + err.message);
+                }
+            };
+        }
+
+        var btnUpload = document.getElementById('btn-upload-file');
+        if (btnUpload) {
+            btnUpload.onclick = () => {
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*,application/pdf,text/plain';
+                input.onchange = (e) => {
+                    var file = e.target.files[0];
+                    if (file && activeAnno && activeAnno.type === 'attach') {
+                        var type = getMimeByType(file);
+                        var reader = new FileReader();
+                        reader.onload = async (re) => {
+                            var data = re.target.result;
+                            var thumbData = null;
+                            if (type === 'application/pdf') {
+                                try {
+                                    var b64 = data.includes('base64,') ? data.split('base64,')[1] : data;
+                                    var pdfBytes = base64ToBytes(b64);
+                                    var pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+                                    var page = await pdf.getPage(1);
+                                    var viewport = page.getViewport({ scale: 0.5 });
+                                    var canvas = document.createElement('canvas');
+                                    canvas.width = viewport.width; canvas.height = viewport.height;
+                                    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                                    thumbData = canvas.toDataURL('image/jpeg', 0.8);
+                                } catch (err) { console.error("PDF Thumb Fail", err); }
+                            }
+                            activeAnno.files.push({ type: type, name: file.name, data: data, thumbData: thumbData });
+                            renderFileList();
+                            saveToVault(); // Auto-save on upload
+                            alert("File attached: " + file.name);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                input.click();
+            };
+        }
+
+        var mobileBtn = document.getElementById('btn-mobile-fab');
+        if (mobileBtn) {
+            mobileBtn.onclick = () => {
+                try {
+                    console.log("Mobile Toggle Flow: Start");
+                    var hasClassBefore = document.body.classList.contains('mobile-preview-mode');
+                    document.body.classList.toggle('mobile-preview-mode');
+                    var hasClassAfter = document.body.classList.contains('mobile-preview-mode');
+                    console.log("Mobile Toggle: Class toggled from", hasClassBefore, "to", hasClassAfter);
+
+                    mobileBtn.innerHTML = hasClassAfter ? `<i data-lucide="monitor"></i>` : `<i data-lucide="smartphone"></i>`;
+                    if (window.lucide) {
+                        try { lucide.createIcons(); } catch (e) { console.error("Lucide inner fail", e); }
+                    }
+                    setTimeout(() => {
+                        console.log("Mobile Toggle: Redrawing annotations...");
+                        drawAnnotations();
+                    }, 100);
+                } catch (e) {
+                    console.error("Critical Toggle Crash:", e);
+                    alert("Mobile Toggle Failed: " + e.message);
+                }
+            };
+        }
+
+        // ---- ROUTE MAP FEATURE (Leaflet + OpenStreetMap + OSRM) ----
+        var routeMap = null;
+        var routeLayer = null;
+        var lastRouteMiles = null;
+
+        function openRouteMap() {
+            var modal = document.getElementById('route-map-modal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                if (!routeMap) {
+                    // Default center: Columbia, MO
+                    routeMap = L.map('leaflet-map').setView([38.9517, -92.3341], 7);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: 'Â© OpenStreetMap contributors',
+                        maxZoom: 18
+                    }).addTo(routeMap);
+                }
+                routeMap.invalidateSize();
+            }, 100);
+        }
+
+        function closeRouteMap() {
+            document.getElementById('route-map-modal').style.display = 'none';
+        }
+
+        async function geocode(address) {
+            var url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
+            var res = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'ColumbiaTransportPortal/1.0' } });
+            var data = await res.json();
+            if (!data.length) throw new Error('Address not found: ' + address);
+            return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), label: data[0].display_name };
+        }
+
+        async function fetchRoute(from, to) {
+            var url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+            var res = await fetch(url);
+            var data = await res.json();
+            if (!data.routes || !data.routes.length) throw new Error('No route found');
+            var meters = data.routes[0].distance;
+            var miles = (meters / 1609.344).toFixed(1);
+            var coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+            return { miles, coords };
+        }
+
+        async function showRoute() {
+            var fromVal = document.getElementById('manual-from')?.value?.trim();
+            var toVal = document.getElementById('manual-to')?.value?.trim();
+            var statusEl = document.getElementById('route-status');
+            var milesEl = document.getElementById('route-miles-display');
+            var useBtn = document.getElementById('btn-use-route');
+
+            if (!fromVal || !toVal) {
+                alert('Please fill in both Origin and Destination fields first.');
+                return;
+            }
+
+            openRouteMap();
+            statusEl.textContent = 'ðŸ“¡ Looking up addresses...';
+            milesEl.textContent = '';
+            if (useBtn) useBtn.style.display = 'none';
+
+            try {
+                var [fromCoord, toCoord] = await Promise.all([geocode(fromVal), geocode(toVal)]);
+                statusEl.textContent = 'ðŸ›£ï¸ Calculating route...';
+
+                if (routeLayer) { routeMap.removeLayer(routeLayer); routeLayer = null; }
+                routeMap.eachLayer(l => { if (l instanceof L.Marker) routeMap.removeLayer(l); });
+
+                var routeData = await fetchRoute(fromCoord, toCoord);
+                lastRouteMiles = routeData.miles;
+
+                // Green origin pin
+                var greenIcon = L.divIcon({ html: 'ðŸŸ¢', className: '', iconSize: [24, 24], iconAnchor: [12, 12] });
+                var redIcon = L.divIcon({ html: 'ðŸ”´', className: '', iconSize: [24, 24], iconAnchor: [12, 12] });
+                L.marker([fromCoord.lat, fromCoord.lng], { icon: greenIcon }).addTo(routeMap).bindPopup('ðŸ“¦ ' + fromVal);
+                L.marker([toCoord.lat, toCoord.lng], { icon: redIcon }).addTo(routeMap).bindPopup('ðŸ ' + toVal);
+
+                // Blue route line
+                routeLayer = L.polyline(routeData.coords, { color: '#3b82f6', weight: 5, opacity: 0.85 }).addTo(routeMap);
+                routeMap.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+
+                statusEl.textContent = `âœ… Route: ${fromVal.split('\n')[0]} â†’ ${toVal.split('\n')[0]}`;
+                milesEl.textContent = `ðŸ›£ï¸ ${routeData.miles} miles`;
+                if (useBtn) useBtn.style.display = 'inline-block';
+            } catch (err) {
+                statusEl.textContent = 'âš ï¸ ' + err.message + ' â€” try a more specific address.';
+                console.error('Route error:', err);
+            }
+        }
+
+        // Wire up Show Route button (in New Load form)
+        var btnShowRoute = document.getElementById('btn-show-route');
+        if (btnShowRoute) btnShowRoute.onclick = showRoute;
+
+        // Wire up Map toolbar button
+        var btnRouteMap = document.getElementById('btn-route-map');
+        if (btnRouteMap) btnRouteMap.onclick = openRouteMap;
+
+        // Wire up Use This Route button
+        var btnUseRoute = document.getElementById('btn-use-route');
+        if (btnUseRoute) btnUseRoute.onclick = () => {
+            if (lastRouteMiles) {
+                var milesInput = document.getElementById('manual-miles');
+                if (milesInput) milesInput.value = lastRouteMiles;
+            }
+            closeRouteMap();
+        };
+
+        // Wire up Close buttons
+        var closeMap1 = document.getElementById('close-route-map');
+        var closeMap2 = document.getElementById('close-route-map2');
+        if (closeMap1) closeMap1.onclick = closeRouteMap;
+        if (closeMap2) closeMap2.onclick = closeRouteMap;
+
+        window.addEventListener('resize', () => { if (currentPdfBytes) drawAnnotations(); });
+
+
+        // 3. ANNOTATION EVENT LISTENERS (Moved inside for scope safety)
+        canvasContainer.addEventListener('mousedown', (e) => {
+            if (!currentPdfBytes || !selectedTool || isDragging) return;
+            var clickCoords = getEventCoords(e, canvasContainer);
+            var center = getCanvasCenter();
+
+            if (selectedTool === 'text') {
+                var t = prompt("Enter Blue Text:");
+                if (t) annotations.push({ type: 'text', x: clickCoords.nx, y: clickCoords.ny, content: t, id: Date.now() });
+            } else if (selectedTool === 'attach') {
+                var a = { type: 'attach', x: clickCoords.nx, y: clickCoords.ny, files: [], id: Date.now(), name: 'New Attachment' };
+                annotations.push(a); openPopup(a);
+            } else if (selectedTool === 'stamp') {
+                openStampPicker(clickCoords.nx, clickCoords.ny);
+            } else if (selectedTool === 'sign') {
+                openSignatureModal(clickCoords.nx, clickCoords.ny);
+            } else if (selectedTool === 'pen') {
+                isDrawing = true;
+                currentStroke = { type: 'pen', points: [{ nx: clickCoords.nx, ny: clickCoords.ny }], color: '#ef4444', id: Date.now() };
+                drawAnnotations();
+            } else if (selectedTool === 'eraser') {
+                isDrawing = true;
+                window.handleEraser(clickCoords);
+            }
+        });
+
+        var mainTouchMove = (e) => {
+            if (isDrawing && selectedTool === 'pen') {
+                e.preventDefault();
+                var p = getEventCoords(e, canvasContainer);
+                if (currentStroke) {
+                    currentStroke.points.push({ nx: p.nx, ny: p.ny });
+                    drawAnnotations();
+                }
+            } else if (isDrawing && selectedTool === 'eraser') {
+                e.preventDefault();
+                var p = getEventCoords(e, canvasContainer);
+                window.handleEraser(p);
+            }
+        };
+        canvasContainer.addEventListener('mousemove', mainTouchMove);
+        canvasContainer.addEventListener('touchmove', mainTouchMove, { passive: false });
+        canvasContainer.addEventListener('touchstart', (e) => {
+            if (selectedTool === 'pen') {
+                e.preventDefault();
+                isDrawing = true;
+                var p = getEventCoords(e, canvasContainer);
+                currentStroke = { type: 'pen', points: [{ nx: p.nx, ny: p.ny }], color: '#ef4444', id: Date.now() };
+                drawAnnotations();
+            } else if (selectedTool === 'eraser') {
+                e.preventDefault();
+                isDrawing = true;
+                var p = getEventCoords(e, canvasContainer);
+                window.handleEraser(p);
+            }
+        }, { passive: false });
+
+        var dragMove = (e) => {
+            if (isDragging && dragTarget) {
+                if (e.type === 'touchmove') e.preventDefault();
+                var c = getEventCoords(e, canvasContainer);
+                dragTarget.x = c.nx - dragOffset.x;
+                dragTarget.y = c.ny - dragOffset.y;
+                drawAnnotations();
+            }
+        };
+        window.addEventListener('mousemove', dragMove);
+        window.addEventListener('touchmove', dragMove, { passive: false });
+        var handleStrokeEnd = () => {
+            if (isDrawing && selectedTool === 'pen' && currentStroke) {
+                annotations.push(currentStroke);
+                currentStroke = null;
+                isDrawing = false;
+                drawAnnotations(); // Critically missing! Redraw to create the red X delete overlay
+                saveToVault(); // AUTO-SAVE after pen stroke
+            }
+            isDragging = false; dragTarget = null; isDrawing = false; currentStroke = null;
+        };
+
+        window.addEventListener('touchend', handleStrokeEnd);
+        window.addEventListener('touchcancel', handleStrokeEnd);
+        window.addEventListener('mouseup', handleStrokeEnd);
+        window.addEventListener('pointerup', handleStrokeEnd);
+        window.addEventListener('pointercancel', handleStrokeEnd);
+
+        console.log("initButtons: Completed successfully.");
+    } catch (err) {
+        console.error("CRITICAL INIT ERROR:", err);
+        var b = document.getElementById('debug-error-banner');
+        if (b) {
+            b.style.display = 'block';
+            b.innerHTML = "<strong>CRITICAL INIT ERROR:</strong><br>" + err.stack;
+        }
+    }
+}
+
+// Global scope definition removed (moved to top)
+
+function resetView(force = false) {
+    if (!force && !confirm("Clear current work and start over?")) return;
+    annotations = [];
+    currentPdf = null;
+    currentPdfBytes = null;
+    activeTrip = null; // CRITICAL: Reset the trip data too!
+    sessionVaultId = null; // Clear session tracking
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    canvasContainer.innerHTML = `
+        <div style="color: var(--text-dim); text-align: center; padding: 10rem;">
+            <i data-lucide="file-up" style="width: 64px; height: 64px; margin-bottom: 1.5rem; opacity: 0.2;"></i>
+            <p style="font-weight: 600; font-size: 1.2rem;">Drop an Invoice to start editing</p>
+        </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+}
+
+// 2. UNIVERSAL LOADING
+var currentDocType = 'application/pdf';
+async function loadDocument(data, type = 'application/pdf') {
+    console.log("loadDocument: Start", type);
+    if (!data) return;
+    if (startOverlay) startOverlay.style.display = 'none';
+    currentDocType = type || 'application/pdf';
+    currentPdfBytes = data;
+    try {
+        currentPage = 1; scale = 1.5;
+        if (!type || type.includes('pdf')) {
+            var bytes = data;
+            if (typeof data === 'string') {
+                if (data.includes('base64,')) bytes = base64ToBytes(data.split('base64,')[1]);
+                else bytes = base64ToBytes(data);
+            }
+            currentPdfBytes = bytes;
+            console.log("PDF.js loading task creation...");
+            var loadingTask = pdfjsLib.getDocument({ data: bytes.slice(0) });
+            currentPdf = await loadingTask.promise;
+            console.log("PDF.js doc loaded, rendering page 1");
+            await renderPage(1);
+        } else if (type.startsWith('image/')) {
+            currentPdf = null;
+            await renderImage(data);
+        } else if (type.includes('text/plain')) {
+            currentPdf = null;
+            await renderTextDocument(data);
+        }
+        saveToVault(); // Ensure document state is initially captured in vault
+    } catch (e) {
+        console.error("loadDocument Crash:", e);
+        alert("Error loading document: " + e.message);
+    }
+}
+
+async function renderPage(num) {
+    if (!currentPdf) return;
+    var page = await currentPdf.getPage(num);
+    var viewport = page.getViewport({ scale });
+    var canvas = document.createElement('canvas');
+    canvas.height = viewport.height; canvas.width = viewport.width;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+
+    var wrapper = document.createElement('div');
+    wrapper.id = 'canvas-wrapper';
+    wrapper.style.cssText = 'position: relative; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7); background: white; border-radius: 4px;';
+    wrapper.appendChild(canvas);
+
+    canvasContainer.innerHTML = '';
+    canvasContainer.appendChild(wrapper);
+    drawAnnotations();
+}
+
+async function renderImage(data) {
+    var img = new Image();
+    img.src = data;
+    await img.decode();
+    var canvas = document.createElement('canvas');
+    canvas.width = img.width; canvas.height = img.height;
+    canvas.getContext('2d').drawImage(img, 0, 0);
+
+    var wrapper = document.createElement('div');
+    wrapper.id = 'canvas-wrapper';
+    wrapper.style.cssText = 'position: relative; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7); background: white; border-radius: 4px;';
+    wrapper.appendChild(canvas);
+
+    canvasContainer.innerHTML = '';
+    canvasContainer.appendChild(wrapper);
+    drawAnnotations();
+}
+
+async function renderTextDocument(data) {
+    var textStr = data.includes('base64,') ? atob(data.split(',')[1]) : data;
+    var canvas = document.createElement('canvas');
+    canvas.width = 600; canvas.height = 800;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'white'; ctx.fillRect(0, 0, 600, 800);
+    ctx.fillStyle = 'black'; ctx.font = '14px Courier';
+    textStr.split('\n').forEach((l, i) => ctx.fillText(l, 20, 30 + (i * 18)));
+
+    var wrapper = document.createElement('div');
+    wrapper.id = 'canvas-wrapper';
+    wrapper.style.cssText = 'position: relative; box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7); background: white; border-radius: 4px;';
+    wrapper.appendChild(canvas);
+
+    canvasContainer.innerHTML = '';
+    canvasContainer.appendChild(wrapper);
+    drawAnnotations();
+}
+
+function ensureDefaultDots(isImport = false) {
+    var labels = ["SHIPPER PAPERS", "RECEIVER PAPERS"];
+    labels.forEach((label, i) => {
+        var nx = 0.8, ny = 0.1 + (i * 0.1);
+        if (!isImport) {
+            if (i === 0) { nx = 0.31; ny = 0.43; }
+            else { nx = 0.81; ny = 0.43; }
+        }
+
+        var dot = annotations.find(a => a.type === 'attach' && a.name === label);
+        if (!dot) {
+            dot = { type: 'attach', x: nx, y: ny, files: [], id: Date.now() + i, name: label };
+            annotations.push(dot);
+        } else if (dot.x === 0 && dot.y === 0) {
+            // Self-healing: Reset if stuck at 0,0
+            dot.x = nx; dot.y = ny;
+        }
+    });
+}
+
+// 3. ANNOTATIONS
+function drawAnnotations() {
+    var wrapper = document.getElementById('canvas-wrapper');
+    var mainCanvas = canvasContainer.querySelector('canvas');
+    if (!mainCanvas || !wrapper) return;
+
+    var rect = mainCanvas.getBoundingClientRect();
+    var scX = rect.width / mainCanvas.width;
+
+    // NEW: Use the wrapper as the coordinate source
+    var seenIds = new Set();
+    var currentOverlays = Array.from(wrapper.querySelectorAll('.overlay-item, .overlay-point'));
+
+    annotations.forEach((anno, idx) => {
+        seenIds.add(anno.id.toString());
+        var el = currentOverlays.find(o => o.dataset.id === anno.id.toString());
+
+        if (!el) {
+            el = document.createElement('div');
+            el.dataset.id = anno.id;
+            el.draggable = false;
+            wrapper.appendChild(el);
+        }
+
+        el.className = 'overlay-item';
+
+        if (anno.type !== 'pen') {
+            // Percent-based positioning relative to the wrapper!
+            var posX = (anno.x * 100).toFixed(4) + '%';
+            var posY = (anno.y * 100).toFixed(4) + '%';
+
+            var scaleVal = scX;
+            if (anno.type === 'text') scaleVal = Math.min(1.2, Math.max(0.5, scX) * 0.8);
+            else if (anno.type === 'stamp' || anno.type === 'sign') scaleVal = Math.max(0.75, scX);
+            else if (anno.type === 'attach') scaleVal = Math.max(0.5, scX);
+
+            el.style.left = posX;
+            el.style.top = posY;
+            el.style.transform = `translate(-50%, -50%) scale(${scaleVal})`;
+            el.style.touchAction = 'none'; // Prevent browser scrolling during drag
+            el.style.webkitUserSelect = 'none'; // Prevent text selection
+        }
+        el.style.zIndex = 100 + idx;
+
+        if (anno.type === 'text') {
+            el.innerText = anno.content;
+            el.className += ' overlay-text';
+            el.style.color = '#3b82f6'; el.style.fontWeight = '800'; el.style.cursor = 'move';
+
+            // Improved Editing: Single click with distance check to allow drag
+            var startEditX, startEditY;
+            el.addEventListener('mousedown', (e) => {
+                startEditX = e.clientX;
+                startEditY = e.clientY;
+            });
+
+            el.onclick = (e) => {
+                e.stopPropagation();
+                if (startEditX === undefined) return;
+                var dist = Math.hypot(e.clientX - startEditX, e.clientY - startEditY);
+                if (dist < 5) {
+                    var newT = prompt("Edit Text content:", anno.content);
+                    if (newT !== null && newT.trim() !== '') {
+                        anno.content = newT;
+                        drawAnnotations();
+                        saveToVault(); // AUTO-SAVE after edit
+                    }
+                }
+            };
+
+        } else if (anno.type === 'stamp') {
+            el.classList.add('stamp-item');
+            el.classList.add(`stamp-${anno.content.toLowerCase().replace(/\s+/g, '-')}`);
+            el.style.cursor = 'move';
+
+            // Ensure text span exists
+            var txt = el.querySelector('.stamp-text');
+            if (!txt) {
+                txt = document.createElement('span');
+                txt.className = 'stamp-text';
+                el.appendChild(txt);
+            }
+            txt.innerText = anno.content;
+
+            // Add Delete Button for stamps
+            var del = el.querySelector('.delete-anno');
+            if (!del) {
+                del = document.createElement('div');
+                del.className = 'delete-anno'; del.innerText = 'Ã—';
+                el.appendChild(del);
+                del.onpointerdown = (e) => {
+                    e.stopPropagation();
+                    var idx = annotations.findIndex(a => a.id === anno.id);
+                    if (idx !== -1) {
+                        annotations.splice(idx, 1);
+                        drawAnnotations();
+                        saveToVault(null, true);
+                    }
+                };
+            }
+        } else if (anno.type === 'sign') {
+            el.classList.add('sig-item'); el.style.cursor = 'move';
+
+            // Ensure image exists
+            var img = el.querySelector('img');
+            if (!img) {
+                img = document.createElement('img');
+                img.style.cssText = 'width: 150px; pointer-events: none;';
+                el.appendChild(img);
+            }
+            img.src = anno.content;
+
+            // Add Delete Button for signatures
+            var del = el.querySelector('.delete-anno');
+            if (!del) {
+                del = document.createElement('div');
+                del.className = 'delete-anno'; del.innerText = 'Ã—';
+                el.appendChild(del);
+                del.onpointerdown = (e) => {
+                    e.stopPropagation();
+                    var idx = annotations.findIndex(a => a.id === anno.id);
+                    if (idx !== -1) {
+                        annotations.splice(idx, 1);
+                        drawAnnotations();
+                        saveToVault(null, true);
+                    }
+                };
+            }
+        } else if (anno.type === 'attach') {
+            el.className = 'overlay-point'; // Replace item class
+
+            // Add Label if missing
+            var label = el.querySelector('.overlay-label');
+            if (!label) {
+                label = document.createElement('div');
+                label.className = 'overlay-label';
+                el.appendChild(label);
+            }
+            label.innerText = (anno.name || 'Unnamed Attachment').toUpperCase();
+            label.style.cssText = `
+                position: absolute;
+                top: 25px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(15, 23, 42, 0.9);
+                color: #ffffff;
+                font-size: 10px;
+                font-weight: 800;
+                padding: 2px 8px;
+                border-radius: 6px;
+                white-space: nowrap;
+                pointer-events: none;
+                border: 1px solid rgba(14, 165, 233, 0.3);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                text-transform: uppercase;
+                letter-spacing: 0.02em;
+            `;
+
+            // Setup click listeners ONLY ONCE if possible, or update them
+            // Clean up old listeners to prevent stacking if we aren't careful
+            // For now, we'll just re-bind if it's new, otherwise var them be.
+            if (!el.dataset.bound) {
+                el.dataset.bound = "true";
+                var startX, startY;
+                var handleStart = (e) => {
+                    startX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+                    startY = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+                };
+                var handleEnd = (e) => {
+                    if (startX === undefined) return;
+                    var endX = (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientX : e.clientX;
+                    var endY = (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0].clientY : e.clientY;
+                    var dist = Math.hypot(endX - startX, endY - startY);
+                    if (dist < 5) {
+                        e.preventDefault(); e.stopPropagation();
+                        openPopup(anno);
+                    }
+                    startX = undefined;
+                };
+                el.addEventListener('mousedown', handleStart);
+                el.addEventListener('touchstart', handleStart, { passive: false });
+                el.addEventListener('mouseup', handleEnd);
+                el.addEventListener('touchend', handleEnd, { passive: false });
+            }
+
+            // Display file count inside the dot (clear text first)
+            var count = (anno.files && anno.files.length > 0) ? anno.files.length : '';
+            if (el.childNodes[0] && el.childNodes[0].nodeType === 3) {
+                el.childNodes[0].nodeValue = count;
+            } else {
+                el.insertBefore(document.createTextNode(count), el.firstChild);
+            }
+
+            // Only add delete button if it is NOT a default required folder
+            if (anno.name !== 'SHIPPER PAPERS' && anno.name !== 'RECEIVER PAPERS') {
+                var del = el.querySelector('.delete-overlay');
+                if (!del) {
+                    del = document.createElement('div');
+                    del.className = 'delete-overlay'; del.innerText = 'Ã—';
+                    el.appendChild(del);
+
+                    del.onpointerdown = async (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        var targetIdx = annotations.findIndex(a => a.id === anno.id);
+                        if (targetIdx !== -1) {
+                            annotations.splice(targetIdx, 1);
+                            drawAnnotations();
+                            saveToVault(null, true);
+                        }
+                    };
+                    del.onclick = (e) => { e.preventDefault(); e.stopPropagation(); };
+                }
+            }
+        } else if (anno.type === 'pen') {
+            // Pen strokes purely use the canvas context now. 
+            // The Eraser tool handles their deletion. No HTML overlay needed.
+            return;
+        }
+
+        if (!el.dataset.dragBound) {
+            el.dataset.dragBound = "true";
+            var startDragInt = (e) => {
+                e.stopPropagation();
+                isDragging = true; dragTarget = anno;
+                var click = getEventCoords(e, canvasContainer);
+                dragOffset.x = click.nx - (anno.x || 0);
+                dragOffset.y = click.ny - (anno.y || 0);
+            };
+            el.addEventListener('mousedown', startDragInt);
+            el.addEventListener('touchstart', startDragInt, { passive: false });
+        }
+    });
+
+    // Remove old elements that aren't in the current annotations list
+    currentOverlays.forEach(o => {
+        if (!seenIds.has(o.dataset.id)) o.remove();
+    });
+
+    var ctx = mainCanvas.getContext('2d');
+    var penStrokes = [...annotations.filter(a => a.type === 'pen')];
+    if (currentStroke) penStrokes.push(currentStroke);
+
+    penStrokes.forEach(s => {
+        if (!s.points || s.points.length < 2) return;
+        ctx.strokeStyle = s.color || '#ef4444'; ctx.lineWidth = 3;
+        ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+        ctx.beginPath();
+
+        var startX = s.points[0].nx * mainCanvas.width;
+        var startY = s.points[0].ny * mainCanvas.height;
+        ctx.moveTo(startX, startY);
+
+        for (var i = 1; i < s.points.length; i++) {
+            ctx.lineTo(s.points[i].nx * mainCanvas.width, s.points[i].ny * mainCanvas.height);
+        }
+        ctx.stroke();
+    });
+}
+
+// 4. VAULT (Optimized Session-Based Storage)
+function saveToVault(name, immediate = false) {
+    if (!currentPdfBytes) return;
+
+    if (name && activeTrip) activeTrip.inv = name;
+
+    if (immediate) {
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        performSave(name);
+        return;
+    }
+
+    // Debounce: Only save once every 2 seconds to prevent UI stutter
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        performSave(name);
+    }, 2000);
+}
+
+function performSave(name) {
+    var saved = [];
+    try {
+        var raw = localStorage.getItem('vault');
+        saved = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(saved)) {
+            console.error("Vault is not an array, resetting.");
+            saved = [];
+        }
+    } catch (e) {
+        console.warn("Vault recovery: Resetting corrupted or full storage.", e);
+        // If storage is corrupted, we must clear it to allow fresh saves
+        localStorage.removeItem('vault');
+        saved = [];
+    }
+
+    var dataToSave = currentPdfBytes;
+    if (currentPdfBytes && typeof currentPdfBytes !== 'string') {
+        dataToSave = bytesToBase64(new Uint8Array(currentPdfBytes));
+    }
+
+    if (!dataToSave || (typeof dataToSave === 'string' && dataToSave.length < 10)) {
+        console.error("Vault Save Aborted: Empty or invalid data.");
+        return;
+    }
+
+    var itemName = name || (activeTrip && activeTrip.inv ? activeTrip.inv : "Daily Load Packet");
+
+    // Check if we already have an entry for this session
+    var existingIdx = sessionVaultId ? saved.findIndex(item => item.id === sessionVaultId) : -1;
+
+    var newItem = {
+        id: sessionVaultId || Date.now(),
+        date: new Date().toLocaleDateString(),
+        driver: activeTrip ? activeTrip.driver : "Driver",
+        inv: itemName,
+        load: activeTrip ? activeTrip.load : "N/A",
+        order: activeTrip ? activeTrip.order : "N/A",
+        annotations: JSON.parse(JSON.stringify(annotations || [], (key, value) => {
+            // FIX: Convert ArrayBuffers in attachments to base64 before stringifying
+            if (value instanceof Uint8Array || value instanceof ArrayBuffer) {
+                return bytesToBase64(new Uint8Array(value));
+            }
+            return value;
+        })),
+        pdfData: dataToSave,
+        type: currentDocType || 'application/pdf'
+    };
+
+    try {
+        if (existingIdx !== -1) {
+            saved[existingIdx] = newItem;
+        } else {
+            sessionVaultId = newItem.id;
+            saved.push(newItem);
+        }
+
+        localStorage.setItem('vault', JSON.stringify(saved));
+        console.log("Vault: Saved/Updated item with ID", newItem.id);
+
+        // Synchronize the custom name with activeTrip for UI consistency
+        if (activeTrip) activeTrip.inv = itemName;
+    } catch (e) {
+        console.error("Vault Save Error:", e);
+        // If storage is full, try to remove older items to make room for current work
+        if (saved.length > 5) {
+            console.warn("Vault Full: Evicting oldest item.");
+            saved.shift();
+            try { localStorage.setItem('vault', JSON.stringify(saved)); } catch (ee) { }
+        }
+    }
+}
+
+function renderVault() {
+    var list = document.getElementById('vault-list');
+    var saved = [];
+    try {
+        saved = JSON.parse(localStorage.getItem('vault')) || [];
+    } catch (e) {
+        console.warn("Vault Parse Fail:", e);
+        saved = [];
+    }
+
+    var undoContainer = document.getElementById('vault-undo-container');
+    if (undoContainer) undoContainer.innerHTML = '';
+
+    list.innerHTML = '';
+
+    // Add Undo banner if an item was just deleted
+    if (lastDeletedVaultItem && undoContainer) {
+        var undoBanner = document.createElement('div');
+        undoBanner.style.cssText = `
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideDown 0.3s ease-out;
+        `;
+        undoBanner.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; color: #10b981;">
+                <i data-lucide="rotate-ccw" style="width: 16px;"></i>
+                <span style="font-size: 13px; font-weight: 600;">Recover deleted item?</span>
+            </div>
+            <button id="btn-undo-vault" style="background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 800; font-size: 11px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;">UNDO NOW</button>
+        `;
+        undoBanner.querySelector('#btn-undo-vault').onclick = (e) => {
+            e.stopPropagation();
+            if (lastDeletedVaultItem) {
+                // Determine insertion point: try to put it back exactly where it was
+                var insertionIdx = Math.min(lastDeletedVaultItem.index, saved.length);
+                saved.splice(insertionIdx, 0, lastDeletedVaultItem.item);
+                localStorage.setItem('vault', JSON.stringify(saved));
+                lastDeletedVaultItem = null;
+                renderVault();
+            }
+        };
+        undoContainer.appendChild(undoBanner);
+    }
+
+    if (saved.length === 0 && !lastDeletedVaultItem) {
+        list.innerHTML = '<div style="text-align:center; padding: 3rem 1rem; opacity: 0.5;">' +
+            '<i data-lucide="archive" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>' +
+            '<p>Your vault is currently empty.</p></div>';
+        if (window.lucide) lucide.createIcons();
+        return;
+    }
+
+    saved.forEach((item, idx) => {
+        var div = document.createElement('div');
+        div.className = 'vault-item';
+        div.innerHTML = `
+            <div class="item-meta">
+                <span class="item-driver" style="font-size: 0.7rem; color: var(--accent-blue); font-weight: 800; text-transform: uppercase;">${item.driver}</span>
+                <span class="item-inv" style="font-size: 1.1rem;">${item.inv}</span>
+                <span class="item-date">${item.date}</span>
+            </div>
+            <div class="vault-actions">
+                <button class="delete-vault-item" style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); color:#ef4444; cursor:pointer; padding: 5px 10px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
+                    <i data-lucide="trash-2" style="width: 14px;"></i>
+                    <span style="font-size: 10px; font-weight: 700;">DELETE</span>
+                </button>
+            </div>
+        `;
+        div.onclick = async (e) => {
+            if (e.target.closest('.delete-vault-item')) {
+                lastDeletedVaultItem = { index: idx, item: saved[idx] };
+                saved.splice(idx, 1);
+                localStorage.setItem('vault', JSON.stringify(saved));
+                renderVault(); return;
+            }
+            try {
+                console.log("Vault: Loading item", item.inv);
+                vaultModal.style.display = 'none';
+
+                // FIX: Restore session state so updates target the same vault entry
+                sessionVaultId = item.id;
+                activeTrip = activeTrip || { driver: item.driver, startTime: new Date() };
+                activeTrip.inv = item.inv;
+                activeTrip.load = item.load;
+                activeTrip.order = item.order;
+
+                // Show loading indicator
+                canvasContainer.innerHTML = `
+                    <div style="color: var(--accent-blue); text-align: center; padding: 10rem;">
+                        <div class="loader-v" style="border: 4px solid rgba(14, 165, 233, 0.1); border-top: 4px solid #0ea5e9; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1.5rem;"></div>
+                        <p style="font-weight: 600; font-size: 1.1rem; opacity: 0.8;">Restoring ${item.inv}...</p>
+                    </div>
+                `;
+
+                console.log("Vault: Restoration starting for " + item.inv + ". Data length: " + (item.pdfData ? item.pdfData.length : 0));
+                if (item.pdfData && item.pdfData.length > 50) {
+                    await loadDocument(item.pdfData, item.type || 'application/pdf');
+
+                    // FIX: Ensure file data in annotations is restored correctly (base64 strings are fine as is)
+                    annotations = item.annotations || [];
+
+                    console.log("Vault: Restoration complete, drawing annotations count:", annotations.length);
+                    setTimeout(() => drawAnnotations(), 100);
+                } else {
+                    console.error("Vault: Item has no data", item);
+                    throw new Error("This vault entry is corrupt or has no document data.");
+                }
+            } catch (err) {
+                console.error("Vault Restore Fail:", err);
+                alert("Could not load from vault: " + err.message);
+                resetView();
+            }
+        };
+        list.appendChild(div);
+    });
+    if (window.lucide) { try { lucide.createIcons(); } catch (e) { } }
+}
+
+function openPopup(anno) {
+    activeAnno = anno;
+    if (popup) {
+        popup.style.display = 'block';
+        var nameInput = document.getElementById('popup-dot-name');
+        if (nameInput) nameInput.value = anno.name || '';
+    }
+    renderFileList();
+}
+
+function renderFileList() {
+    var list = document.getElementById('file-list');
+    if (!list || !activeAnno || !activeAnno.files) return;
+    list.innerHTML = '';
+    activeAnno.files.forEach((f, i) => {
+        var item = document.createElement('div');
+        item.style.cssText = `
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        `;
+
+        var previewContent = '';
+        if (f.thumbData || (f.type.startsWith('image/') && f.data !== 'placeholder')) {
+            var imgSrc = f.thumbData || ((f.data && typeof f.data === 'string' && f.data.startsWith('data:')) ? f.data : `data:${f.type};base64,${f.data}`);
+            previewContent = `
+                <div style="width: 100%; height: 120px; background: rgba(0,0,0,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                    <img src="${imgSrc}" class="preview-thumb" style="max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in;">
+                </div>`;
+        } else if (f.type === 'text/plain') {
+            var textPreview = "Preview not available";
+            if (f.data && typeof f.data === 'string' && f.data.startsWith('data:')) {
+                textPreview = atob(f.data.split('base64,')[1]).substring(0, 150) + "...";
+            }
+            previewContent = `<div class="preview-thumb" style="height: 120px; display: flex; align-items: flex-start; justify-content: flex-start; background: white; color: black; border-radius: 6px; margin-bottom: 6px; cursor: zoom-in; width: 100%; border: 1px solid rgba(255,255,255,0.05); padding: 6px; box-sizing: border-box; font-size: 7px; font-family: monospace; overflow: hidden; white-space: pre-wrap; word-break: break-word;">${textPreview.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+        } else {
+            var iconSvg = f.type.startsWith('image/')
+                ? `<svg viewBox="0 0 24 24" width="32" height="32" stroke="#0ea5e9" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
+                : `<svg viewBox="0 0 24 24" width="32" height="32" stroke="#0ea5e9" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+            previewContent = `<div class="preview-thumb" style="height: 120px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 6px; cursor: zoom-in; width: 100%; border: 1px solid rgba(255,255,255,0.05);">${iconSvg}</div>`;
+        }
+
+        item.innerHTML = `
+            ${previewContent}
+            <input type="text" id="file-rename-${i}" name="file-rename-${i}" value="${f.name}" class="file-rename-input" 
+                style="font-size: 10px; color: white; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; width: 100%; text-align: center; padding: 2px;">
+            <button class="delete-file" style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">Ã—</button>
+        `;
+
+        var input = item.querySelector('.file-rename-input');
+        input.onchange = (e) => {
+            f.name = e.target.value;
+            saveToVault(); // AUTO-SAVE when renaming a file
+        };
+        input.onclick = (e) => e.stopPropagation();
+
+        item.querySelector('.preview-thumb').onclick = (e) => {
+            e.stopPropagation();
+            openAttachmentPreview(f);
+        };
+
+        item.querySelector('.delete-file').onclick = (e) => {
+            e.stopPropagation();
+            activeAnno.files.splice(i, 1);
+            renderFileList();
+            saveToVault(); // AUTO-SAVE after file deletion
+        };
+
+        list.appendChild(item);
+    });
+    if (window.lucide) lucide.createIcons();
+}
+
+var currentPreviewFile = null;
+async function openAttachmentPreview(file) {
+    currentPreviewFile = file;
+    var modal = document.getElementById('attachment-preview-modal');
+    var body = document.getElementById('preview-body');
+    if (!modal || !body) return;
+
+    body.innerHTML = '<div style="color:white; opacity:0.5;">Loading preview...</div>';
+    modal.style.display = 'flex';
+
+    if (file.type.startsWith('image/')) {
+        var img = document.createElement('img');
+        img.src = (file.data === 'placeholder' || !file.data) ? '' : (file.data.startsWith('data:') ? file.data : `data:${file.type};base64,${file.data}`);
+        img.style.cssText = 'max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);';
+        body.innerHTML = '';
+        body.appendChild(img);
+        if (file.data === 'placeholder') body.innerHTML = '<p style="color:white; font-weight:600;">(Demo Scan Placeholder)</p>';
+    } else if (file.type === 'application/pdf') {
+        try {
+            var bytes = file.data;
+            if (typeof bytes === 'string') {
+                var b64 = bytes.includes('base64,') ? bytes.split('base64,')[1] : bytes;
+                bytes = base64ToBytes(b64);
+            } else if (bytes instanceof ArrayBuffer) {
+                bytes = new Uint8Array(bytes);
+            }
+            var loadingTask = pdfjsLib.getDocument({ data: bytes });
+            var pdf = await loadingTask.promise;
+            var page = await pdf.getPage(1);
+            var viewport = page.getViewport({ scale: 1.0 });
+            var canvas = document.createElement('canvas');
+            canvas.height = viewport.height; canvas.width = viewport.width;
+            canvas.style.maxWidth = '100%'; canvas.style.height = 'auto';
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+            body.innerHTML = '';
+            body.appendChild(canvas);
+        } catch (e) {
+            console.error("Preview PDF fail:", e);
+            body.innerHTML = `
+                <div style="text-align:center; color:white;">
+                    <svg viewBox="0 0 24 24" width="64" height="64" stroke="#ef4444" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:1rem; opacity:0.5;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <p style="font-size:1.1rem; font-weight:600;">Preview Unavailable</p>
+                    <p style="opacity:0.6; font-size:0.8rem;">Click EDIT IN MAIN to view and annotate</p>
+                </div>
+            `;
+        }
+    } else if (file.type === 'text/plain') {
+        var textContent = "Preview not available";
+        if (typeof file.data === 'string' && file.data.startsWith('data:')) {
+            textContent = atob(file.data.split('base64,')[1]);
+        }
+        body.innerHTML = `<div style="background:white; color:black; padding:2rem; width:100%; min-height:100%; white-space:pre-wrap; font-family:monospace; box-sizing:border-box; overflow-y:auto;">${textContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+    }
+}
+
+// 5. PDF BAKING & SHARING
+var shareFormat = 'pdf';
+window.setShareFormat = (fmt) => {
+    shareFormat = fmt;
+    console.log("Share Format Set:", fmt);
+    var pdfBtn = document.getElementById('btn-fmt-pdf');
+    var imgBtn = document.getElementById('btn-fmt-img');
+    if (pdfBtn && imgBtn) {
+        pdfBtn.style.background = fmt === 'pdf' ? '#0ea5e9' : 'transparent';
+        pdfBtn.style.color = fmt === 'pdf' ? 'white' : 'rgba(255,255,255,0.6)';
+        pdfBtn.style.border = fmt === 'pdf' ? 'none' : '1px solid rgba(255,255,255,0.15)';
+        imgBtn.style.background = fmt === 'image' ? '#0ea5e9' : 'transparent';
+        imgBtn.style.color = fmt === 'image' ? 'white' : 'rgba(255,255,255,0.6)';
+        imgBtn.style.border = fmt === 'image' ? 'none' : '1px solid rgba(255,255,255,0.15)';
+    }
+};
+
+async function bakeFullPacket(asDataUrl = false) {
+    console.log("Baking Start... Format:", shareFormat);
+    var mainCanvas = canvasContainer.querySelector('canvas');
+    if (!mainCanvas) return null;
+
+    // Create a canvas with all physical overlays baked in
+    var finalCanvas = document.createElement('canvas');
+    finalCanvas.width = mainCanvas.width; finalCanvas.height = mainCanvas.height;
+    var ctx = finalCanvas.getContext('2d');
+    ctx.drawImage(mainCanvas, 0, 0);
+
+    var rect = mainCanvas.getBoundingClientRect();
+    var ratioX = mainCanvas.width / rect.width;
+    var ratioY = mainCanvas.height / rect.height;
+
+    // BAKE OVERLAYS (Physical marks)
+    annotations.forEach(anno => {
+        var x = anno.x * mainCanvas.width;
+        var y = anno.y * mainCanvas.height;
+
+        if (anno.type === 'stamp') {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(-15 * Math.PI / 180);
+            var stampText = anno.content;
+
+            var STAMP_COLORS = {
+                'PAID': '#f87171',
+                'COMPLETED': '#34d399',
+                'URGENT': '#fb923c',
+                'RECEIVED': '#38bdf8',
+                'SEND TO BILLING': '#a78bfa',
+                'REFUSED': '#94a3b8',
+                'VOID': '#64748b',
+                'ON HOLD': '#fbbf24',
+                'PICKED UP': '#2dd4bf',
+                'IN ROUTE': '#818cf8',
+                'DELIVERED': '#f472b6',
+                'EXTRA PICK UP': '#fb923c',
+                'EXTRA DELIVERY': '#34d399',
+                'NO CHARGE': '#f472b6',
+                'PARTIAL PAYMENT': '#60a5fa'
+            };
+
+            ctx.strokeStyle = STAMP_COLORS[stampText] || '#10b981';
+            ctx.lineWidth = 4 * ratioX;
+            ctx.strokeRect(-80 * ratioX, -25 * ratioY, 160 * ratioX, 50 * ratioY);
+            ctx.font = `bold ${24 * ratioX}px Inter`; ctx.fillStyle = ctx.strokeStyle;
+            ctx.textAlign = 'center'; ctx.fillText(stampText, 0, 8 * ratioY);
+            ctx.restore();
+        } else if (anno.type === 'sign') {
+            var img = new Image();
+            img.src = anno.content;
+            ctx.drawImage(img, x - (75 * ratioX), y - (35 * ratioY), 150 * ratioX, 70 * ratioY);
+        } else if (anno.type === 'attach') {
+            // Draw a blue circle to represent the attachment point in the PDF
+            ctx.beginPath();
+            ctx.arc(x, y, 12 * ratioX, 0, Math.PI * 2);
+            ctx.fillStyle = '#0ea5e9'; ctx.fill();
+
+            // Draw file count inside the dot for the PDF export
+            if (anno.files && anno.files.length > 0) {
+                ctx.font = `bold ${10 * ratioX}px Inter`; ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.fillText(anno.files.length.toString(), x, y + (4 * ratioY));
+            }
+
+            if (anno.name) {
+                ctx.font = `bold ${12 * ratioX}px Inter`; ctx.fillStyle = '#3b82f6';
+                ctx.textAlign = 'center';
+                ctx.fillText(anno.name.toUpperCase(), x, y + (30 * ratioY));
+            }
+        } else if (anno.type === 'text') {
+            ctx.font = `bold ${20 * ratioX}px Inter`; ctx.fillStyle = '#3b82f6';
+            ctx.fillText(anno.content, x, y);
+        } else if (anno.type === 'pen') {
+            if (!anno.points || anno.points.length < 2) return;
+            ctx.strokeStyle = anno.color || '#ef4444';
+            ctx.lineWidth = 3 * ratioX;
+            ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(anno.points[0].nx * mainCanvas.width, anno.points[0].ny * mainCanvas.height);
+            for (var i = 1; i < anno.points.length; i++) {
+                ctx.lineTo(anno.points[i].nx * mainCanvas.width, anno.points[i].ny * mainCanvas.height);
+            }
+            ctx.stroke();
+        }
+    });
+
+    if (shareFormat === 'image') {
+        var segments = [];
+        segments.push({ type: 'main', canvas: finalCanvas, height: finalCanvas.height });
+
+        // Pre-calculate segments and images
+        for (var a of annotations) {
+            if (a.type === 'attach' && a.files && a.files.length > 0) {
+                segments.push({ type: 'header', text: `Logistics Documents: ${a.name || 'Group'}`, count: a.files.length });
+                for (var f of a.files) {
+                    if (f.type.startsWith('image/')) {
+                        var img = new Image();
+                        img.src = (f.data && f.data.startsWith('data:')) ? f.data : `data:${f.type};base64,${f.data}`;
+                        await new Promise(resolve => img.onload = resolve);
+                        var scaledH = (finalCanvas.width / img.width) * img.height;
+                        segments.push({ type: 'image', img, height: scaledH });
+                    } else if (f.type === 'application/pdf') {
+                        segments.push({ type: 'pdf-notice', name: f.name });
+                    }
+                }
+            }
+        }
+
+        var totalHeight = segments.reduce((sum, s) => {
+            if (s.type === 'header') return sum + 100;
+            if (s.type === 'pdf-notice') return sum + 80;
+            return sum + s.height;
+        }, 0);
+        var longCanvas = document.createElement('canvas');
+        longCanvas.width = finalCanvas.width;
+        longCanvas.height = totalHeight;
+        var lctx = longCanvas.getContext('2d');
+        var currentY = 0;
+
+        for (var s of segments) {
+            if (s.type === 'main') {
+                lctx.drawImage(s.canvas, 0, currentY);
+                currentY += s.height;
+            } else if (s.type === 'header') {
+                lctx.fillStyle = '#0f172a';
+                lctx.fillRect(0, currentY, longCanvas.width, 100);
+                lctx.fillStyle = '#0ea5e9';
+                lctx.font = `bold ${32}px Inter`;
+                lctx.textAlign = 'left';
+                lctx.fillText(s.text.toUpperCase(), 40, currentY + 45);
+                lctx.fillStyle = 'rgba(255,255,255,0.6)';
+                lctx.font = `${20}px Inter`;
+                lctx.fillText(`${s.count} Document(s) Attached Below`, 40, currentY + 75);
+                currentY += 100;
+            } else if (s.type === 'image') {
+                lctx.drawImage(s.img, 0, currentY, longCanvas.width, s.height);
+                currentY += s.height;
+            } else if (s.type === 'pdf-notice') {
+                lctx.fillStyle = '#1e293b';
+                lctx.fillRect(40, currentY + 10, longCanvas.width - 80, 60);
+                lctx.fillStyle = '#94a3b8';
+                lctx.font = `italic ${18}px Inter`;
+                lctx.textAlign = 'left';
+                lctx.fillText(`[PDF Document: ${s.name} - See PDF packet for full content]`, 60, currentY + 45);
+                currentY += 80;
+            }
+        }
+
+        var dataUrl = longCanvas.toDataURL('image/jpeg', 0.85); // Slightly lower quality to save bandwidth on long images
+        if (asDataUrl) return dataUrl; // <--- Return string directly if requested
+        return await (await fetch(dataUrl)).blob();
+    }
+
+    // FULL PDF PACKET BAKING
+    if (typeof PDFLib === 'undefined') {
+        console.error("CRITICAL ERROR: PDFLib is not loaded!");
+        alert("CRITICAL ERROR: PDF Generation Library (PDF-Lib) is missing or failed to load. Please refresh the page. If the issue persists, check your internet connection.");
+        return null;
+    }
+    var masterPdf = await PDFLib.PDFDocument.create();
+    var page1Img = await masterPdf.embedJpg(finalCanvas.toDataURL('image/jpeg', 0.95));
+    var page1 = masterPdf.addPage([finalCanvas.width, finalCanvas.height]);
+    page1.drawImage(page1Img, { x: 0, y: 0, width: finalCanvas.width, height: finalCanvas.height });
+
+    // ATTACHMENTS LOOP (Full Packet)
+    var { rgb } = PDFLib;
+    for (var a of annotations) {
+        if (a.type === 'attach' && a.files && a.files.length > 0) {
+            console.log(`Processing attachment group: ${a.name || 'Untitled'}`);
+
+            // Add Section Header Page
+            var headerPage = masterPdf.addPage([600, 150]);
+            headerPage.drawRectangle({ x: 0, y: 0, width: 600, height: 150, color: rgb(0.06, 0.09, 0.16) });
+            headerPage.drawText(`Logistics Documents: ${a.name || 'Group'}`, { x: 40, y: 70, size: 22, color: rgb(0.05, 0.65, 0.9) });
+            headerPage.drawText(`${a.files.length} Document(s) Attached`, { x: 40, y: 45, size: 12, color: rgb(1, 1, 1) });
+
+            for (var f of a.files) {
+                try {
+                    if (f.type === 'application/pdf') {
+                        var bytes = f.data;
+                        if (typeof bytes === 'string') {
+                            if (bytes.includes('base64,')) bytes = bytes.split('base64,')[1];
+                            bytes = base64ToBytes(bytes);
+                        }
+                        var attachmentDoc = await PDFLib.PDFDocument.load(bytes);
+                        var copiedPages = await masterPdf.copyPages(attachmentDoc, attachmentDoc.getPageIndices());
+                        copiedPages.forEach(p => masterPdf.addPage(p));
+                    } else if (f.type.startsWith('image/')) {
+                        var isPng = f.type.includes('png') || (typeof f.data === 'string' && f.data.startsWith('data:image/png'));
+                        var img = isPng ? await masterPdf.embedPng(f.data) : await masterPdf.embedJpg(f.data);
+                        var p = masterPdf.addPage([img.width, img.height]);
+                        p.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+                    } else if (f.type === 'text/plain') {
+                        var text = typeof f.data === 'string' && f.data.includes('base64,') ? atob(f.data.split(',')[1]) : f.data;
+                        var p = masterPdf.addPage([600, 800]);
+                        var font = await masterPdf.embedFont(PDFLib.StandardFonts.Courier);
+                        var lines = text.toString().split('\n');
+                        lines.forEach((l, i) => {
+                            if (i < 40) { // Safety limit for text pages
+                                p.drawText(l, { x: 40, y: 760 - (i * 18), size: 12, font });
+                            }
+                        });
+                    }
+                } catch (err) {
+                    console.error("Failed to embed attachment:", f.name, err);
+                }
+            }
+        }
+    }
+    var pdfBytes = await masterPdf.save();
+    return new Blob([pdfBytes], { type: 'application/pdf' });
+}
+
+window.shareTo = async (method) => {
+    try {
+        if (!currentPdfBytes) return alert("Please load a document first.");
+        var blob = await bakeFullPacket();
+        if (!blob) return alert("Failed to generate Packet.");
+
+        var url = URL.createObjectURL(blob);
+        var nameInput = document.getElementById('share-packet-name');
+        var customBase = nameInput ? nameInput.value.trim() : "";
+        var defaultBase = shareFormat === 'pdf' ? "Columbia_Load_Packet" : "Columbia_Quick_Shot";
+        var fileName = (customBase || defaultBase).replace(/[^a-z0-9_\-]/gi, '_') + (shareFormat === 'pdf' ? ".pdf" : ".jpg");
+        var file = new File([blob], fileName, { type: blob.type });
+
+        var isSecure = (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+
+        // 1. FORK LOGIC BY METHOD
+        if (method === 'download') {
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.click();
+            return showToast(`Downloaded: ${fileName}`);
+        }
+
+        if (method === 'copy') {
+            // OPEN IN NEW TAB (Blob URL for native editing)
+            window.open(url, '_blank');
+            // ALSO COPY TO CLIPBOARD
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(url).catch(() => { });
+                showToast("Blob Link Opened & Copied!");
+            } else {
+                showToast("Blob Link Opened!");
+            }
+            return;
+        }
+
+        // 2. NATIVE SHARING (For Gmail, SMS, and other apps)
+        var canUseNativeShare = navigator.share && navigator.canShare && navigator.canShare({ files: [file] });
+
+        if (isSecure && canUseNativeShare) {
+            console.log("Triggering Native Share for: " + method);
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'Columbia Transport LLC Load Packet',
+                    text: `Attached is the ${shareFormat === 'pdf' ? 'PDF Packet' : 'Image'} for ${fileName}.`
+                });
+                return;
+            } catch (e) {
+                console.warn("Native Share cancelled or failed:", e);
+                if (e.name === 'AbortError') return; // User cancelled
+            }
+        }
+
+        // 3. FALLBACKS (If native share is missing or failed)
+        if (method === 'gmail') {
+            alert("To send via Gmail: Please click 'DOWNLOAD' then attach that file to your Gmail app manually.");
+        } else if (method === 'sms') {
+            alert("To send via SMS: Please click 'DOWNLOAD' then attach that file to your message manually.");
+        } else {
+            // Final fallback: just download
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.click();
+        }
+
+    } catch (e) {
+        console.error("Share Logic Crash:", e);
+        alert("Sharing Error: " + e.message);
+    }
+};
+
+window.addStamp = (type) => {
+    var p = document.getElementById('stamp-picker');
+    annotations.push({ type: 'stamp', x: parseFloat(p.dataset.nx), y: parseFloat(p.dataset.ny), content: type, id: Date.now() });
+    p.style.display = 'none'; drawAnnotations();
+    saveToVault(null, true); // IMMEDIATE SAVE for stamps
+};
+
+function openStampPicker(nx, ny) {
+    var p = document.getElementById('stamp-picker');
+    if (!p) return;
+    p.dataset.nx = nx; p.dataset.ny = ny;
+    p.style.display = 'block';
+}
+
+function openSignatureModal(nx, ny) {
+    var m = document.getElementById('sign-modal'); m.style.display = 'flex';
+    var c = document.getElementById('sig-canvas'); var ctx = c.getContext('2d');
+    c.width = 400; c.height = 200; ctx.strokeStyle = '#000'; ctx.lineWidth = 3;
+    var d = false;
+
+    var getP = (e) => {
+        var r = c.getBoundingClientRect();
+        // Use clientX for desktop and the touch list for mobile
+        var cx = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+        var cy = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+        var scaleX = c.width / r.width;
+        var scaleY = c.height / r.height;
+        return { x: (cx - r.left) * scaleX, y: (cy - r.top) * scaleY };
+    };
+
+    c.onmousedown = (e) => { d = true; var p = getP(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+    c.onmousemove = (e) => { if (d) { var p = getP(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } };
+    c.onmouseup = () => d = false;
+    c.onmouseleave = () => d = false;
+
+    // Mobile/Touch Support
+    c.ontouchstart = (e) => {
+        e.preventDefault();
+        d = true;
+        var p = getP(e);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+    };
+    c.ontouchmove = (e) => {
+        if (d) {
+            e.preventDefault();
+            var p = getP(e);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+        }
+    };
+    c.ontouchend = () => d = false;
+
+    document.getElementById('btn-save-sig').onclick = () => {
+        var dataUrl = c.toDataURL();
+        var a = { type: 'sign', x: nx, y: ny, content: dataUrl, id: Date.now() };
+        annotations.push(a);
+        drawAnnotations();
+        saveToVault(null, true); // IMMEDIATE SAVE for signatures
+        m.style.display = 'none';
+    };
+    document.getElementById('close-sign').onclick = () => m.style.display = 'none';
+}
+
+function bytesToBase64(bytes) {
+    var binary = '';
+    var len = bytes.byteLength;
+    var chunk = 8192;
+    for (var i = 0; i < len; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(binary);
+}
+function base64ToBytes(base64) {
+    try {
+        var pure = base64.includes('base64,') ? base64.split('base64,')[1] : base64;
+        var s = atob(pure);
+        var b = new Uint8Array(s.length);
+        for (var i = 0; i < s.length; i++) b[i] = s.charCodeAt(i);
+        return b;
+    } catch (e) {
+        console.error("Base64 Error", e);
+        throw new Error("Invalid PDF data.");
+    }
+}
+
+function getMimeByType(file) {
+    if (file.type && file.type !== 'application/octet-stream') return file.type;
+    var name = file.name.toLowerCase();
+    if (name.endsWith('.pdf')) return 'application/pdf';
+    if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'image/jpeg';
+    if (name.endsWith('.png')) return 'image/png';
+    if (name.endsWith('.txt')) return 'text/plain';
+    return 'application/pdf'; // Default
+}
+
+// --- SUPABASE & BACKEND INTEGRATION ---
+var supabasePortal = null;
+
+// PLACEHOLDER CREDENTIALS - User should update these
+var SUPABASE_URL = 'https://your-project-url.supabase.co';
+var SUPABASE_KEY = 'your-anon-key';
+
+function initSupabase() {
+    if (typeof supabasejs !== 'undefined' && SUPABASE_URL !== 'https://your-project-url.supabase.co') {
+        try {
+            supabasePortal = supabasejs.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log("Supabase initialized successfully.");
+            var status = document.getElementById('sync-status');
+            if (status) {
+                status.innerHTML = '<i data-lucide="cloud-check" style="width: 12px;"></i> LIVE';
+                status.style.background = 'rgba(16, 185, 129, 0.1)';
+                status.style.color = '#10b981';
+            }
+            if (window.lucide) lucide.createIcons();
+        } catch (e) {
+            console.error("Supabase init error:", e);
+        }
+    } else {
+        console.warn("Supabase credentials not set. Running in local-only mode.");
+        var status = document.getElementById('sync-status');
+        if (status) {
+            status.style.background = 'rgba(239, 68, 68, 0.1)';
+            status.style.color = '#ef4444';
+            status.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+            status.innerHTML = '<i data-lucide="cloud-off" style="width: 12px;"></i> LOCAL';
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+}
+
+// Dynamic Modal Clock
+function updateModalClock() {
+    var clock = document.getElementById('modal-current-time');
+    if (clock) {
+        clock.innerText = new Date().toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
+}
+setInterval(updateModalClock, 10000); // Update every 10s
+
+async function uploadToSupabase(bytes, fileName, type = 'application/pdf') {
+    if (!supabasePortal) return null;
+    try {
+        var { data, error } = await supabasePortal.storage
+            .from('load-packets')
+            .upload(`${activeTrip.inv}/${fileName}`, bytes, {
+                contentType: type,
+                upsert: true
+            });
+        if (error) throw error;
+        var { data: urlData } = supabasePortal.storage.from('load-packets').getPublicUrl(data.path);
+        return urlData.publicUrl;
+    } catch (e) {
+        console.error("Upload error:", e);
+        return null;
+    }
+}
+
+window.submitToOffice = async () => {
+    if (!activeTrip || !currentPdfBytes) {
+        alert("No active load to submit.");
+        return;
+    }
+
+    var btn = document.getElementById('btn-share-finish');
+    var originalText = btn.innerHTML;
+    btn.innerHTML = '<i data-lucide="loader-2" style="width:18px; animation: spin 1s linear infinite;"></i> SUBMITTING...';
+    btn.disabled = true;
+
+    try {
+        console.log("Submitting to office...");
+
+        // Sync custom name from share menu to activeTrip for vault consistency
+        var nameInput = document.getElementById('share-packet-name');
+        if (nameInput && nameInput.value.trim()) {
+            activeTrip.inv = nameInput.value.trim();
+        }
+
+        // FOOLPROOF: Bake the packet FIRST so all annotations are included!
+        var blob = await bakeFullPacket();
+        if (!blob) throw new Error("Could not bake final document.");
+
+        // Update currentPdfBytes with the baked version for vault/cloud
+        currentPdfBytes = await blob.arrayBuffer();
+
+        var pdfUrl = null;
+        if (supabasePortal) {
+            pdfUrl = await uploadToSupabase(currentPdfBytes, `final_load_${activeTrip.inv}.pdf`);
+        }
+
+        var loadData = {
+            invoice_number: activeTrip.inv,
+            pdf_url: pdfUrl,
+            billed_to: document.getElementById('manual-billed-to')?.value || "Unknown",
+            total_amount: parseFloat(document.getElementById('manual-total')?.value) || 0,
+            created_at: new Date().toISOString()
+        };
+
+        // Always save to vault as fallback - IMMEDIATE to prevent race conditions
+        saveToVault(activeTrip.inv, true);
+
+        if (supabasePortal) {
+            var { error } = await supabasePortal.from('loads').insert([loadData]);
+            if (error) throw error;
+
+            for (var anno of annotations) {
+                if (anno.type === 'attachment' && anno.fileData) {
+                    await uploadToSupabase(anno.fileData, `attachment_${anno.id}.bin`, anno.mimeType || 'application/octet-stream');
+                }
+            }
+        }
+
+        alert(supabasePortal ? "Packets successfully submitted to OFFICE CLOUD!" : "Saved to Weekly Vault (Local Only).");
+        document.getElementById('share-modal').style.display = 'none';
+        resetView();
+
+    } catch (e) {
+        console.error("Submission failed:", e);
+        alert("Submission failed, but saved to local Vault: " + e.message);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        if (window.lucide) lucide.createIcons();
+    }
+};
+
+// Admin UI Logic
+var adminModal = document.getElementById('admin-modal');
+var btnAdminPortal = document.getElementById('btn-admin-portal');
+if (btnAdminPortal) {
+    btnAdminPortal.onclick = () => {
+        adminModal.style.display = 'flex';
+        refreshAdminList();
+    };
+}
+
+var btnRefreshAdmin = document.getElementById('btn-refresh-admin');
+if (btnRefreshAdmin) btnRefreshAdmin.onclick = () => refreshAdminList();
+
+var closeAdminBtn = document.getElementById('close-admin');
+if (closeAdminBtn) closeAdminBtn.onclick = () => adminModal.style.display = 'none';
+
+async function refreshAdminList() {
+    var list = document.getElementById('admin-load-list');
+    if (!supabasePortal) {
+        list.innerHTML = `
+            <div style="text-align:center; padding: 3rem 1rem; opacity:0.7;">
+                <i data-lucide="info" style="width: 48px; height: 48px; margin-bottom: 1rem; color: #0ea5e9;"></i>
+                <h3 style="margin-bottom:0.5rem;">Local Mode Active</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">Connect to <strong>Office Cloud</strong> to view live submissions.</p>
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; font-size: 0.8rem; text-align: left; border: 1px solid rgba(255,255,255,0.1);">
+                    <p style="margin-bottom: 0.5rem;"><i data-lucide="check-circle-2" style="width:12px; color:#10b981;"></i> All entries are safely stored in your <strong>Weekly Vault</strong>.</p>
+                    <p><i data-lucide="check-circle-2" style="width:12px; color:#10b981;"></i> Use the Search Bar to find specific Invoice #s.</p>
+                </div>
+            </div>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+    }
+
+    list.innerHTML = '<div style="text-align:center; padding: 2rem;"><i data-lucide="loader-2" style="width:32px; animation: spin 1s linear infinite;"></i> Loading...</div>';
+    if (window.lucide) lucide.createIcons();
+
+    try {
+        var { data, error } = await supabasePortal
+            .from('loads')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (data.length === 0) {
+            list.innerHTML = '<p style="text-align:center; opacity:0.5; padding: 2rem;">No submissions found yet.</p>';
+            return;
+        }
+
+        list.innerHTML = data.map(load => `
+            <div class="vault-item glass" style="margin-bottom: 0.5rem; padding: 1.25rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05);">
+                <div>
+                    <h4 style="margin:0; color: #0ea5e9; font-size: 1.1rem;">${load.invoice_number || 'No BOL#'}</h4>
+                    <p style="font-size: 0.75rem; opacity: 0.6; margin: 4px 0;">Billed to: ${load.billed_to || 'N/A'}</p>
+                    <p style="font-size: 0.65rem; opacity: 0.4; margin: 0;">Date: ${new Date(load.created_at).toLocaleString()}</p>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="${load.pdf_url}" target="_blank" class="tool-btn" style="height: auto; padding: 0.5rem 1rem; flex-direction: row; gap: 8px; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.2); border-radius: 8px; color: #0ea5e9;">
+                        <i data-lucide="external-link" style="width: 14px;"></i> View
+                    </a>
+                </div>
+            </div>
+        `).join('');
+        if (window.lucide) lucide.createIcons();
+
+    } catch (e) {
+        list.innerHTML = `<p style="color:#ef4444; text-align:center; padding: 2rem;">Error: ${e.message}</p>`;
+    }
+}
+
+// BOOT
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initButtons();
+        initSupabase();
+    });
+} else {
+    initButtons();
+    initSupabase();
+}
+// --- UI UTILITIES ---
+function showToast(message, duration = 3000) {
+    var container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(container);
+    }
+
+    var toast = document.createElement('div');
+    toast.className = 'glass';
+    toast.style.cssText = `
+        padding: 12px 24px;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(14, 165, 233, 0.3);
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        pointer-events: auto;
+        animation: toastSlideUp 0.3s ease-out forwards;
+    `;
+    toast.innerText = message;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'toastSlideDown 0.3s ease-in forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// Add CSS animations for toast if not already in style.css
+var style = document.createElement('style');
+style.textContent = `
+    @keyframes toastSlideUp {
+        from { transform: translateY(100px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes toastSlideDown {
+        from { transform: translateY(0); opacity: 1; }
+        to { transform: translateY(100px); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// --- APP INITIALIZATION ---
+console.log("App script reached the end. Initializing buttons directly...");
+if (typeof initButtons === 'function') {
+    initButtons();
+} else {
+    console.error("initButtons function is not defined at initialization time!");
+}
+
+</script>
+                <script>
+                    console.log("Bootstrapping icons...");
+                    if (window.lucide) {
+                        try { lucide.createIcons(); } catch (e) { console.error("Lucide Error", e); }
+                    } else {
+                        console.warn("Lucide not loaded!");
+                    }
+
+                    // Register Service Worker for PWA
+                    if ('serviceWorker' in navigator) {
+                        window.addEventListener('load', () => {
+                            if (window.location.protocol === 'file:') {
+                                console.log('Running locally via file://. Service Worker disabled to prevent protocol errors.');
+                                return;
+                            }
+                            navigator.serviceWorker.register('./sw.js')
+                                .then(reg => console.log('SW Registered!', reg))
+                                .catch(err => console.log('SW Registration Fail:', err));
+                        });
+                    }
+                </script>
+</body>
+
+</html>
