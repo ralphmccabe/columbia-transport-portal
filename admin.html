@@ -457,7 +457,7 @@
                     <span class="driver"><b>${row.driver_name || row.billed_to || 'N/A'}</b><br><span style="font-size:11px;color:var(--text-dim)">${row.truck_number || ''}</span></span>
                     <span class="time">${new Date(row.created_at).toLocaleString()}</span>
                     <div style="text-align:right;">
-                        ${row.pdf_url ? `<a href="${row.pdf_url}" target="_blank" style="background:var(--primary);color:white;border:none;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;cursor:pointer;"><i data-lucide="external-link" style="width:12px;"></i> VIEW</a>` : `<span class="status-badge status-online" style="font-size:10px;">Submitted</span>`}
+                        ${row.pdf_url ? `<button onclick="openPdfModal('${row.pdf_url}')" style="background:var(--primary);color:white;border:none;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i data-lucide="file-text" style="width:12px;"></i> VIEW</button>` : `<span class="status-badge status-online" style="font-size:10px;">Submitted</span>`}
                     </div>
                 </div>
             `).join('');
@@ -578,7 +578,7 @@
                                 </span>
                                 <span class="time" style="color:var(--text-dim); font-size:13px;">${new Date(row.created_at).toLocaleString()}</span>
                                 <div style="text-align:right;">
-                                    ${row.pdf_url ? `<a href="${row.pdf_url}" target="_blank" style="background:#0ea5e9; color:white; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s;"><i data-lucide="external-link" style="width:14px;"></i> VIEW</a>` : `<span class="status-badge status-online" style="background:rgba(16,185,129,0.1); color:#10b981; padding:6px 12px; border-radius:99px; font-size:11px; border:1px solid rgba(16,185,129,0.2);">Verified</span>`}
+                                    ${row.pdf_url ? `<button onclick="openPdfModal('${row.pdf_url}')" style="background:#0ea5e9; color:white; border:none; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:800; display:inline-flex; align-items:center; gap:6px; cursor:pointer; transition:all 0.2s;"><i data-lucide="file-text" style="width:14px;"></i> VIEW</button>` : `<span class="status-badge status-online" style="background:rgba(16,185,129,0.1); color:#10b981; padding:6px 12px; border-radius:99px; font-size:11px; border:1px solid rgba(16,185,129,0.2);">Verified</span>`}
                                 </div>
                             </div>
                         `).join('');
@@ -599,7 +599,39 @@
                 mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">System Config</h1><div class="card"><p style="color:var(--text-dim);">Supabase URL: Connected<br>Real-time: Enabled<br>RLS Policies: Active</p></div>`;
             }
         }
+
+        // PDF IN-APP VIEWER MODAL
+        function openPdfModal(url) {
+            const modal = document.getElementById('pdf-modal');
+            const iframe = document.getElementById('pdf-iframe');
+            iframe.src = url;
+            modal.style.display = 'flex';
+        }
+
+        function closePdfModal() {
+            const modal = document.getElementById('pdf-modal');
+            const iframe = document.getElementById('pdf-iframe');
+            modal.style.display = 'none';
+            iframe.src = ''; // clear to stop loading/audio
+        }
     </script>
+
+    <!-- Fullscreen PDF Viewer Overlay -->
+    <div id="pdf-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(5px);">
+        <div
+            style="width:100%; max-width:800px; height:90%; background:#1e293b; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--border); box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+            <div
+                style="display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:#0f172a; border-bottom:1px solid var(--border);">
+                <h3 style="margin:0; color:white; font-size:16px; display:flex; align-items:center; gap:8px;"><i
+                        data-lucide="file-text" style="width:16px; color:var(--primary);"></i> Document Viewer</h3>
+                <button onclick="closePdfModal()"
+                    style="background:none; border:none; color:var(--text-dim); cursor:pointer; padding:4px;"><i
+                        data-lucide="x"></i></button>
+            </div>
+            <iframe id="pdf-iframe" style="flex:1; width:100%; border:none; background:white;"></iframe>
+        </div>
+    </div>
 </body>
 
 </html>

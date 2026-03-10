@@ -2461,9 +2461,9 @@ async function refreshAdminList() {
                     <p style="font-size: 0.65rem; opacity: 0.4; margin: 0;">Date: ${new Date(load.created_at).toLocaleString()}</p>
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
-                    <a href="${load.pdf_url}" target="_blank" class="tool-btn" style="height: auto; padding: 0.5rem 1rem; flex-direction: row; gap: 8px; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.2); border-radius: 8px; color: #0ea5e9;">
-                        <i data-lucide="external-link" style="width: 14px;"></i> View
-                    </a>
+                    <button onclick="openVaultPdf('${load.pdf_url}')" class="tool-btn" style="height: auto; padding: 0.5rem 1rem; flex-direction: row; gap: 8px; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.2); border-radius: 8px; color: #0ea5e9; cursor:pointer;">
+                        <i data-lucide="file-text" style="width: 14px;"></i> View
+                    </button>
                 </div>
             </div>
         `).join('');
@@ -2473,6 +2473,20 @@ async function refreshAdminList() {
         list.innerHTML = `<p style="color:#ef4444; text-align:center; padding: 2rem;">Error: ${e.message}</p>`;
     }
 }
+
+// Inline Wrapper to reuse the eBOL modal for Vault documents
+window.openVaultPdf = function (url) {
+    const ebolModal = document.getElementById('ebol-modal');
+    const ebolIframe = document.getElementById('ebol-iframe');
+    if (ebolModal && ebolIframe) {
+        ebolIframe.src = url;
+        ebolModal.style.display = 'flex';
+        // Need to ensure it has a high z-index over the vault modal
+        ebolModal.style.zIndex = '10000';
+    } else {
+        window.open(url, '_blank'); // fallback
+    }
+};
 
 // BOOT
 // BOOT
