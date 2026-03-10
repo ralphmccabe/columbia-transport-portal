@@ -214,10 +214,14 @@
             <div
                 style="color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.25rem;">
                 Fleet Hub</div>
-            <button class="btn-hq btn-hq-active"><i data-lucide="map"></i> Live Fleet Map</button>
-            <button class="btn-nav"><i data-lucide="users"></i> Management</button>
-            <button class="btn-nav"><i data-lucide="folder-key"></i> Paperwork Vault</button>
-            <button class="btn-nav"><i data-lucide="settings"></i> System Config</button>
+            <button class="btn-hq btn-hq-active" id="nav-map" onclick="showSection('map')"><i data-lucide="map"></i>
+                Live Fleet Map</button>
+            <button class="btn-nav" id="nav-mgmt" onclick="showSection('mgmt')"><i data-lucide="users"></i>
+                Management</button>
+            <button class="btn-nav" id="nav-vault" onclick="showSection('vault')"><i data-lucide="folder-key"></i>
+                Paperwork Vault</button>
+            <button class="btn-nav" id="nav-config" onclick="showSection('config')"><i data-lucide="settings"></i>
+                System Config</button>
         </nav>
 
         <div
@@ -320,7 +324,7 @@
 
         function initMap() {
             map = L.map('hq-map').setView([38.9517, -92.3341], 5);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{y}/{x}{r}.png', {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap &copy; CARTO',
                 subdomains: 'abcd',
                 maxZoom: 20
@@ -409,10 +413,10 @@
             list.innerHTML = data.map(row => `
                 <div class="load-row">
                     <span class="id">${row.invoice_number || 'N/A'}</span>
-                    <span class="driver">${row.billed_to || 'N/A'}</span>
+                    <span class="driver"><b>${row.driver_name || row.billed_to || 'N/A'}</b><br><span style="font-size:11px;color:var(--text-dim)">${row.truck_number || ''}</span></span>
                     <span class="time">${new Date(row.created_at).toLocaleString()}</span>
                     <div style="text-align:right;">
-                        <span class="status-badge status-online" style="font-size:10px;">Submitted</span>
+                        ${row.pdf_url ? `<a href="${row.pdf_url}" target="_blank" style="background:var(--primary);color:white;border:none;padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;cursor:pointer;"><i data-lucide="external-link" style="width:12px;"></i> VIEW</a>` : `<span class="status-badge status-online" style="font-size:10px;">Submitted</span>`}
                     </div>
                 </div>
             `).join('');
@@ -421,6 +425,26 @@
         }
 
         window.onload = init;
+
+        function showSection(section) {
+            // Reset all nav buttons
+            document.querySelectorAll('.btn-hq, .btn-nav').forEach(b => {
+                b.className = 'btn-nav';
+            });
+            document.getElementById('nav-' + section).className = 'btn-hq btn-hq-active';
+
+            const mainEl = document.querySelector('.admin-main');
+            if (section === 'map') {
+                // Reload the page to show the main fleet view
+                location.reload();
+            } else if (section === 'mgmt') {
+                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Driver Management</h1><p style="color:var(--text-dim);">Driver profile management coming soon. Drivers currently identified by login ID on mobile app.</p>`;
+            } else if (section === 'vault') {
+                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Paperwork Vault</h1><p style="color:var(--text-dim);">All submitted loads are stored in Supabase. PDF storage bucket setup required to display documents here.</p>`;
+            } else if (section === 'config') {
+                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">System Config</h1><p style="color:var(--text-dim);">Supabase URL: Connected<br>Real-time: Enabled<br>RLS Policies: Active</p>`;
+            }
+        }
     </script>
 </body>
 

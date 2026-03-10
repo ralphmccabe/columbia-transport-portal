@@ -56,9 +56,29 @@ CREATE TABLE IF NOT EXISTS public.gps_pings (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 2. Set up Storage Buckets
--- (Manual step in Supabase Dashboard): 
--- Create a public bucket named 'load-packets'
+-- 3. Enable Row Level Security with Open Policies
+-- (Allows the app's anonymous key to read/write data)
+
+ALTER TABLE public.loads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gps_pings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.drivers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.trips ENABLE ROW LEVEL SECURITY;
+
+-- Allow anyone with the anon key to INSERT loads
+CREATE POLICY "allow_anon_insert_loads" ON public.loads
+  FOR INSERT TO anon WITH CHECK (true);
+
+-- Allow anyone with the anon key to SELECT loads
+CREATE POLICY "allow_anon_select_loads" ON public.loads
+  FOR SELECT TO anon USING (true);
+
+-- Allow anyone with the anon key to INSERT gps_pings
+CREATE POLICY "allow_anon_insert_gps" ON public.gps_pings
+  FOR INSERT TO anon WITH CHECK (true);
+
+-- Allow anyone with the anon key to SELECT gps_pings
+CREATE POLICY "allow_anon_select_gps" ON public.gps_pings
+  FOR SELECT TO anon USING (true);
 
 -- 4. Reload Schema Cache (Fixes "Table not found" errors)
 NOTIFY pgrst, 'reload schema';
