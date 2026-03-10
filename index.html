@@ -10,6 +10,7 @@
     <!-- Leaflet.js for Route Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -656,8 +657,8 @@
                 </div>
                 <!-- The PDF preview container -->
                 <div id="ebol-body"
-                    style="flex: 1; width: 100%; background: #222; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                    <iframe id="ebol-iframe" style="width:100%; height:100%; border:none;"></iframe>
+                    style="flex: 1; width: 100%; background: #222; overflow: auto; display: flex; flex-direction: column; align-items: center; padding: 1rem;">
+                    <!-- Canvas injected dynamically by pdf.js in app.js -->
                 </div>
             </div>
         </div>

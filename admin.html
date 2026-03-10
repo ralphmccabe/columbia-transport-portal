@@ -604,7 +604,9 @@
         function openPdfModal(url) {
             const modal = document.getElementById('pdf-modal');
             const iframe = document.getElementById('pdf-iframe');
-            iframe.src = url;
+
+            // Use Google Docs viewer to force it to render inline on mobile
+            iframe.src = 'https://docs.google.com/viewer?url=' + encodeURIComponent(url) + '&embedded=true';
             modal.style.display = 'flex';
         }
 

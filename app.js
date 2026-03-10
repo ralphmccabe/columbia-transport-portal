@@ -2475,11 +2475,12 @@ async function refreshAdminList() {
 }
 
 // Inline Wrapper to reuse the eBOL modal for Vault documents
+// Inline Wrapper to reuse the eBOL modal for Vault documents
 window.openVaultPdf = function (url) {
     const ebolModal = document.getElementById('ebol-modal');
-    const ebolIframe = document.getElementById('ebol-iframe');
-    if (ebolModal && ebolIframe) {
-        ebolIframe.src = url;
+    const ebolBody = document.getElementById('ebol-body');
+    if (ebolModal && ebolBody) {
+        ebolBody.innerHTML = `<iframe id="ebol-iframe" src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" style="width:100%; height:100%; border:none; background:white;"></iframe>`;
         ebolModal.style.display = 'flex';
         // Need to ensure it has a high z-index over the vault modal
         ebolModal.style.zIndex = '10000';
@@ -2501,11 +2502,12 @@ if (document.readyState === 'loading') {
 }
 
 // --- eBOL Scale View Logic ---
+// --- eBOL Scale View Logic ---
 function initEbol() {
     const btnEbol = document.getElementById('btn-ebol');
     const closeEbol = document.getElementById('close-ebol');
     const ebolModal = document.getElementById('ebol-modal');
-    const ebolIframe = document.getElementById('ebol-iframe');
+    const ebolBody = document.getElementById('ebol-body');
 
     if (btnEbol) {
         btnEbol.addEventListener('click', async () => {
@@ -2521,17 +2523,40 @@ function initEbol() {
                 // Finalize current state into bytes
                 const pdfBytes = await finalizePdf();
 
-                // Create object URL
-                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-
-                // Set iframe and show modal
-                ebolIframe.src = url;
+                // Prepare UI for rendering
                 ebolModal.style.display = 'flex';
+                ebolBody.innerHTML = '<div style="color:white; padding:2rem; text-align:center;"><i class="spin" data-lucide="loader-2" style="width:32px; height:32px; margin-bottom:1rem; display:block; margin:auto;"></i><br>Rendering Document...</div>';
+                if (window.lucide) lucide.createIcons();
+
+                // Render natively with PDF.js instead of iframe
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+                const pdf = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+                const page = await pdf.getPage(1);
+
+                // Scale larger for desktop, fit width on mobile
+                const targetScale = window.innerWidth > 600 ? 1.5 : 1.0;
+                const viewport = page.getViewport({ scale: targetScale });
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                canvas.style.maxWidth = '100%';
+                canvas.style.height = 'auto'; // Maintain aspect ratio
+                canvas.style.backgroundColor = 'white';
+                canvas.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                canvas.style.borderRadius = '4px';
+
+                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                // Inject canvas into body
+                ebolBody.innerHTML = '';
+                ebolBody.appendChild(canvas);
 
             } catch (err) {
                 console.error("eBOL Error:", err);
                 alert("Failed to generate scale view: " + err.message);
+                ebolModal.style.display = 'none';
             } finally {
                 btnEbol.innerHTML = '<i data-lucide="file-badge"></i> Scale eBOL';
                 if (window.lucide) lucide.createIcons();
@@ -2542,11 +2567,8 @@ function initEbol() {
     if (closeEbol) {
         closeEbol.addEventListener('click', () => {
             ebolModal.style.display = 'none';
-            // Free memory
-            if (ebolIframe.src) {
-                URL.revokeObjectURL(ebolIframe.src);
-                ebolIframe.src = '';
-            }
+            // Free memory and reset
+            ebolBody.innerHTML = '';
         });
     }
 }
