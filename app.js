@@ -393,8 +393,8 @@ window.initButtons = () => {
 
         const btnIncoming = document.getElementById('btn-incoming');
         const btnOutgoing = document.getElementById('btn-outgoing');
-        if (btnIncoming) btnIncoming.onclick = () => { alert("Incoming Docs workflow coming soon!"); };
-        if (btnOutgoing) btnOutgoing.onclick = () => { alert("Outgoing Docs workflow coming soon!"); };
+        if (btnIncoming) btnIncoming.onclick = () => { showIncomingDocs(); };
+        if (btnOutgoing) btnOutgoing.onclick = () => { showOutgoingVault(); };
 
         // Driver Logs Logic
         const btnLogs = document.getElementById('btn-driver-logs');
@@ -1277,10 +1277,8 @@ async function loadDocument(data, type = 'application/pdf') {
     try {
         currentPage = 1; scale = 1.5;
         if (!type || type.includes('pdf')) {
-            let bytes = data;
-            if (typeof data === 'string') {
-                if (data.includes('base64,')) bytes = base64ToBytes(data.split('base64,')[1]);
-                else bytes = base64ToBytes(data);
+            if (!(type.startsWith('image/') || type === 'text/plain')) {
+                bytes = (data instanceof Uint8Array) ? data : new Uint8Array(data);
             }
             currentPdfBytes = bytes;
             console.log("PDF.js loading task creation...");
@@ -1673,7 +1671,11 @@ function performSave(name) {
 
     let dataToSave = currentPdfBytes;
     if (currentPdfBytes && typeof currentPdfBytes !== 'string') {
-        dataToSave = bytesToBase64(new Uint8Array(currentPdfBytes));
+        // Safe conversion to Uint8Array and immediate Base64 encoding
+        // Slicing the buffer if it's an ArrayBuffer to avoid detachment issues
+        const buffer = (currentPdfBytes instanceof Uint8Array) ? currentPdfBytes.buffer : currentPdfBytes;
+        const safeView = new Uint8Array(buffer.slice ? buffer.slice(0) : buffer);
+        dataToSave = bytesToBase64(safeView);
     }
 
     if (!dataToSave || (typeof dataToSave === 'string' && dataToSave.length < 10)) {
@@ -2455,74 +2457,7 @@ async function uploadToSupabase(bytes, fileName, type = 'application/pdf') {
     }
 }
 
-window.submitToOffice = async () => {
-    if (!activeTrip || !currentPdfBytes) {
-        alert("No active load to submit.");
-        return;
-    }
-
-    const btn = document.getElementById('btn-share-finish');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i data-lucide="loader-2" style="width:18px; animation: spin 1s linear infinite;"></i> SUBMITTING...';
-    btn.disabled = true;
-
-    try {
-        console.log("Submitting to office...");
-
-        const nameInput = document.getElementById('share-packet-name');
-        if (nameInput && nameInput.value.trim()) {
-            activeTrip.inv = nameInput.value.trim();
-        }
-
-        const blob = await bakeFullPacket();
-        if (!blob) throw new Error("Could not bake final document.");
-
-        currentPdfBytes = await blob.arrayBuffer();
-
-        let pdfUrl = null;
-        if (supabaseClient) {
-            pdfUrl = await uploadToSupabase(currentPdfBytes, `final_load_${activeTrip.inv}.pdf`);
-        }
-
-        const loadData = {
-            invoice_number: activeTrip.inv,
-            pdf_url: pdfUrl,
-            billed_to: document.getElementById('manual-billed-to')?.value || "Unknown",
-            total_amount: parseFloat(document.getElementById('manual-total')?.value) || 0,
-            truck_number: activeTrip.truck, // Correct column name from schema
-            created_at: new Date().toISOString()
-        };
-
-        saveToVault(activeTrip.inv, true);
-
-        if (supabaseClient) {
-            // Attempt to insert into 'loads' table
-            const { error } = await supabaseClient.from('loads').insert([loadData]);
-            if (error) {
-                console.error("Supabase Load Insert Error:", error);
-                throw new Error(error.message || "Table insertion failed.");
-            }
-
-            for (const anno of annotations) {
-                if (anno.type === 'attachment' && anno.fileData) {
-                    await uploadToSupabase(anno.fileData, `attachment_${anno.id}.bin`, anno.mimeType || 'application/octet-stream');
-                }
-            }
-        }
-
-        alert(supabaseClient ? "Packets successfully submitted to OFFICE CLOUD!" : "Saved to Weekly Vault (Local Only).");
-        document.getElementById('share-modal').style.display = 'none';
-        resetView();
-
-    } catch (e) {
-        console.error("Submission failed:", e);
-        alert("Submission failed, but saved to local Vault: " + e.message);
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        if (window.lucide) lucide.createIcons();
-    }
-};
+// [REMOVED DUPLICATE submitToOffice - VERSION AT LINE 2741 IS NOW THE PRIMARY]
 
 // Admin UI Logic (Moved to initButtons)
 
@@ -2580,18 +2515,23 @@ async function refreshAdminList() {
     }
 }
 
-// Inline Wrapper to reuse the eBOL modal for Vault documents
-// Inline Wrapper to reuse the eBOL modal for Vault documents
+// Generic Wrapper to reuse the viewer modal for Vault documents
 window.openVaultPdf = function (url) {
     const ebolModal = document.getElementById('ebol-modal');
     const ebolBody = document.getElementById('ebol-body');
+    const title = document.getElementById('ebol-modal-title');
+    const header = document.getElementById('ebol-modal-header');
+
     if (ebolModal && ebolBody) {
+        if (title) title.innerText = "DRIVER PAPERWORK";
+        if (header) header.style.background = "#0ea5e9"; // Blue for paperwork
+
         ebolBody.innerHTML = `<iframe id="ebol-iframe" src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" style="width:100%; height:100%; border:none; background:white;"></iframe>`;
         ebolModal.style.display = 'flex';
-        // Need to ensure it has a high z-index over the vault modal
         ebolModal.style.zIndex = '10000';
+        if (window.lucide) lucide.createIcons();
     } else {
-        window.open(url, '_blank'); // fallback
+        window.open(url, '_blank');
     }
 };
 
@@ -2630,6 +2570,11 @@ function initEbol() {
                 const pdfBytes = await finalizePdf();
 
                 // Prepare UI for rendering
+                const title = document.getElementById('ebol-modal-title');
+                const header = document.getElementById('ebol-modal-header');
+                if (title) title.innerText = "SECURE SCALE VIEW (eBOL)";
+                if (header) header.style.background = "#f59e0b"; // Amber for official eBOL
+
                 ebolModal.style.display = 'flex';
                 ebolBody.innerHTML = '<div style="color:white; padding:2rem; text-align:center;"><i class="spin" data-lucide="loader-2" style="width:32px; height:32px; margin-bottom:1rem; display:block; margin:auto;"></i><br>Rendering Document...</div>';
                 if (window.lucide) lucide.createIcons();
@@ -2738,7 +2683,7 @@ document.head.appendChild(style);
 // --- APP INITIALIZATION ---
 // (Already initialized via BOOT section above)
 // --- Cloud Submission (Supabase) ---
-async function submitToOffice() {
+window.submitToOffice = async function () {
     const btn = document.getElementById('btn-share-finish');
     if (!btn || !supabaseClient) return;
 
@@ -2752,11 +2697,21 @@ async function submitToOffice() {
         btn.innerHTML = '<i class="spin" data-lucide="refresh-cw"></i> UPLOADING...';
         if (window.lucide) lucide.createIcons();
 
+        // Ensure activeTrip has the latest packet name from UI
+        const nameInput = document.getElementById('share-packet-name');
+        if (nameInput && nameInput.value.trim()) {
+            activeTrip.inv = nameInput.value.trim();
+        }
+
         // 1. Finalize the Full PDF
         const fullPdfBytes = await finalizePdf();
+        // Ensure currentPdfBytes is updated with the latest baked packet for Vault safety
+        currentPdfBytes = (fullPdfBytes instanceof Uint8Array) ? fullPdfBytes : new Uint8Array(fullPdfBytes);
+
         const fullFileName = (activeTrip.inv || 'Load') + '_Full_' + Date.now() + '.pdf';
 
         // 2. Generate Attachments-Only PDF (Raw Driver Paperwork)
+        console.log("Generating Driver Paperwork PDF...");
         const attachmentsBytes = await bakeAttachmentsOnly();
         const attFileName = (activeTrip.inv || 'Load') + '_Docs_' + Date.now() + '.pdf';
 
@@ -2764,6 +2719,7 @@ async function submitToOffice() {
 
         // 3. Try finding and uploading the Attachments-Only PDF first
         if (attachmentsBytes) {
+            console.log("Attachments found! Uploading Paperwork PDF...");
             const { data: uploadData, error: uploadError } = await supabaseClient.storage
                 .from('attachments')
                 .upload(attFileName, attachmentsBytes, { contentType: 'application/pdf', upsert: true });
@@ -2771,11 +2727,17 @@ async function submitToOffice() {
             if (!uploadError && uploadData) {
                 const { data: urlData } = supabaseClient.storage.from('attachments').getPublicUrl(uploadData.path);
                 displayUrl = urlData?.publicUrl || null;
+                console.log("Paperwork PDF uploaded successfully:", displayUrl);
+            } else if (uploadError) {
+                console.error("Paperwork upload failed:", uploadError.message);
             }
+        } else {
+            console.warn("No attachments found. Falling back to eBOL for viewing.");
         }
 
-        // 4. Fallback: If no attachments exist or they failed, upload the full eBOL
+        // 4. Fallback: If no attachments exist or they failed, upload the full eBOL as the primary view
         if (!displayUrl) {
+            console.log("Uploading full eBOL as primary document...");
             const { data: uploadData, error: uploadError } = await supabaseClient.storage
                 .from('attachments')
                 .upload(fullFileName, fullPdfBytes, { contentType: 'application/pdf', upsert: true });
@@ -2783,18 +2745,19 @@ async function submitToOffice() {
             if (!uploadError && uploadData) {
                 const { data: urlData } = supabaseClient.storage.from('attachments').getPublicUrl(uploadData.path);
                 displayUrl = urlData?.publicUrl || null;
+                console.log("eBOL uploaded as primary document:", displayUrl);
             } else if (uploadError) {
-                console.warn('Fallback storage upload skipped:', uploadError.message);
+                console.warn('Fallback storage upload failed:', uploadError.message);
             }
         }
 
         // 5. Save Record to Supabase Tables
-        const loadData = {
+        const loadToRecord = {
             trip_id: sessionVaultId,
             driver_name: activeTrip.driver,
             truck_number: activeTrip.truck,
             invoice_number: activeTrip.inv || 'N/A',
-            billed_to: activeTrip.driver || 'N/A',
+            billed_to: document.getElementById('manual-billed-to')?.value || activeTrip.driver || 'N/A',
             pdf_url: displayUrl,
             status: 'submitted',
             created_at: new Date().toISOString()
@@ -2802,9 +2765,12 @@ async function submitToOffice() {
 
         const { error: dbError } = await supabaseClient
             .from('loads')
-            .insert([loadData]);
+            .insert([loadToRecord]);
 
         if (dbError) throw dbError;
+
+        // Auto-save to vault one last time
+        saveToVault(activeTrip.inv, true);
 
         btn.style.background = '#22c55e';
         btn.innerHTML = '<i data-lucide="check"></i> SUBMITTED!';
@@ -2816,17 +2782,23 @@ async function submitToOffice() {
             btn.style.background = '#0ea5e9';
             btn.innerHTML = '<i data-lucide="send"></i> SUBMIT TO OFFICE';
             if (window.lucide) lucide.createIcons();
+
+            // Clean up session if needed
+            if (confirm("Reset view for next load?")) {
+                resetView();
+            }
         }, 2000);
 
     } catch (err) {
         console.error("Submission Error:", err);
-        alert("Failed to submit: " + err.message);
-        btn.disabled = false;
-        btn.style.background = '#0ea5e9';
-        btn.innerHTML = '<i data-lucide="send"></i> SUBMIT TO OFFICE';
-        if (window.lucide) lucide.createIcons();
+        alert("Cloud Submission Failed: " + err.message);
+    } finally {
+        if (!btn.disabled && btn.innerHTML.includes('UPLOADING')) {
+            btn.innerHTML = '<i data-lucide="send"></i> SUBMIT TO OFFICE';
+            if (window.lucide) lucide.createIcons();
+        }
     }
-}
+};
 
 async function finalizePdf() {
     // This is a placeholder for the actual PDF preparation logic
@@ -3054,4 +3026,146 @@ function drawLogGraph(ctx, w, h, logs) {
     ctx.beginPath();
     ctx.arc(nowX, currentY, 4, 0, Math.PI * 2);
     ctx.fill();
+}
+
+// --- Incoming/Outgoing Document Transfers ---
+
+async function showIncomingDocs() {
+    const modal = document.getElementById('incoming-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    const list = document.getElementById('incoming-doc-list');
+    list.innerHTML = `<div style="text-align:center; padding:2rem;"><i data-lucide="loader-2" class="spin"></i> Checking for docs...</div>`;
+    if (window.lucide) lucide.createIcons();
+
+    if (!supabaseClient) {
+        list.innerHTML = `<p style="text-align:center; opacity:0.5;">Supabase not connected. Unable to check for cloud documents.</p>`;
+        return;
+    }
+
+    try {
+        const driverId = (activeTrip && activeTrip.driver) ? activeTrip.driver : localStorage.getItem('ct_driver_id') || 'UNKNOWN';
+
+        const { data, error } = await supabaseClient
+            .from('document_transfers')
+            .select('*')
+            .eq('receiver_id', driverId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            list.innerHTML = `<div style="text-align:center; padding:3rem; opacity:0.5;">
+                <i data-lucide="inbox" style="width:48px; height:48px; margin-bottom:1rem;"></i>
+                <p>No documents received yet from Dispatch.</p>
+            </div>`;
+        } else {
+            list.innerHTML = data.map(doc => `
+                <div class="glass" style="padding:1rem; border-radius:16px; border:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:800; font-size:14px;">${doc.file_name}</div>
+                        <div style="font-size:11px; opacity:0.6;">Sent: ${new Date(doc.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <button onclick="window.open('${doc.file_url}', '_blank')" style="background:#0ea5e9; color:white; border:none; padding:8px 16px; border-radius:10px; font-weight:800; font-size:11px; cursor:pointer;">
+                        VIEW
+                    </button>
+                </div>
+            `).join('');
+        }
+    } catch (e) {
+        list.innerHTML = `<p style="color:#ef4444; text-align:center; padding:2rem;">Error: ${e.message}</p>`;
+    }
+    if (window.lucide) lucide.createIcons();
+}
+
+function showOutgoingVault() {
+    const modal = document.getElementById('outgoing-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    const list = document.getElementById('outgoing-vault-list');
+    let saved = [];
+    try {
+        saved = JSON.parse(localStorage.getItem('vault')) || [];
+    } catch (e) { saved = []; }
+
+    if (saved.length === 0) {
+        list.innerHTML = `<div style="text-align:center; padding:3rem; opacity:0.5;">
+            <i data-lucide="archive" style="width:48px; height:48px; margin-bottom:1rem;"></i>
+            <p>Your vault is empty. Nothing to send.</p>
+        </div>`;
+    } else {
+        list.innerHTML = saved.map((item, idx) => `
+            <div class="glass" style="padding:1rem; border-radius:16px; border:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-weight:800; font-size:14px;">${item.inv || 'Load Packet'}</div>
+                    <div style="font-size:11px; opacity:0.6;">Date: ${item.date}</div>
+                </div>
+                <button onclick="sendVaultItemToOffice(${idx})" id="btn-send-vault-${idx}" style="background:#10b981; color:white; border:none; padding:8px 16px; border-radius:10px; font-weight:800; font-size:11px; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                    <i data-lucide="send" style="width:12px;"></i> SEND
+                </button>
+            </div>
+        `).join('');
+    }
+    if (window.lucide) lucide.createIcons();
+}
+
+async function sendVaultItemToOffice(idx) {
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem('vault')) || []; } catch (e) { return; }
+    const item = saved[idx];
+    if (!item) return;
+
+    const btn = document.getElementById(`btn-send-vault-${idx}`);
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="spin" style="width:12px;"></i>...';
+    if (window.lucide) lucide.createIcons();
+
+    try {
+        if (!supabaseClient) throw new Error("Supabase not connected.");
+
+        // 1. Convert Base64 to Blob
+        const base64Data = item.bytes;
+        const binStr = atob(base64Data);
+        const len = binStr.length;
+        const arr = new Uint8Array(len);
+        for (let i = 0; i < len; i++) arr[i] = binStr.charCodeAt(i);
+        const blob = new Blob([arr], { type: 'application/pdf' });
+
+        // 2. Upload to Storage
+        const fileName = `outgoing/${Date.now()}_${item.inv}.pdf`;
+        const { data: upload, error: upError } = await supabaseClient.storage
+            .from('attachments')
+            .upload(fileName, blob);
+
+        if (upError) throw upError;
+
+        const { data: urlData } = supabaseClient.storage.from('attachments').getPublicUrl(upload.path);
+
+        // 3. Record in Document Transfers
+        const driverId = (activeTrip && activeTrip.driver) ? activeTrip.driver : localStorage.getItem('ct_driver_id') || 'UNKNOWN';
+        const { error: dbError } = await supabaseClient.from('document_transfers').insert([{
+            sender_id: driverId,
+            receiver_id: 'ADMIN',
+            file_url: urlData.publicUrl,
+            file_name: item.inv || 'Vault Submission'
+        }]);
+
+        if (dbError) throw dbError;
+
+        btn.style.background = '#22c55e';
+        btn.innerHTML = '<i data-lucide="check" style="width:12px;"></i> SENT';
+        setTimeout(() => {
+            document.getElementById('outgoing-modal').style.display = 'none';
+        }, 1500);
+
+    } catch (e) {
+        console.error(e);
+        alert("Failed to send: " + e.message);
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+    }
+    if (window.lucide) lucide.createIcons();
 }

@@ -602,24 +602,239 @@
                     });
                 }
             } else if (section === 'incoming') {
-                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Incoming Documents</h1><div class="card"><p style="color:var(--text-dim);">Dispatch interface coming soon...</p></div>`;
+                mainEl.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h1 style="color:white;margin:0;font-size:32px;">Incoming from Drivers</h1>
+                        <button class="tool-btn" onclick="showSection('incoming')" style="height:auto; padding:0.5rem 1rem; flex-direction:row; gap:8px; background:rgba(255,255,255,0.05); border-radius:8px;">
+                            <i data-lucide="refresh-cw" style="width:14px;"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card" style="padding:0; overflow:hidden;">
+                        <div class="grid-header" style="margin:0; border-radius:0; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.3); padding:1rem 1.5rem;">
+                            <div>Sender</div>
+                            <div>File Name</div>
+                            <div>Submitted</div>
+                            <div style="text-align:right;">Action</div>
+                        </div>
+                        <div id="incoming-list" style="max-height: 70vh; overflow-y:auto;">
+                            <p style="color:var(--text-dim); text-align:center; padding:3rem;"><i data-lucide="loader-2" class="spin"></i> Fetching submissions...</p>
+                        </div>
+                    </div>`;
+                if (window.lucide) lucide.createIcons();
+                fetchIncomingDocs();
+
             } else if (section === 'outgoing') {
-                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Outgoing Documents</h1><div class="card"><p style="color:var(--text-dim);">Dispatch interface coming soon...</p></div>`;
+                mainEl.innerHTML = `
+                    <h1 style="color:white;margin:0 0 1.5rem 0;font-size:32px;">Dispatch Outbound</h1>
+                    <div class="card" style="max-width: 500px;">
+                        <h3 style="margin-top:0;">Send Document to Driver</h3>
+                        <div style="display:flex; flex-direction:column; gap:1rem;">
+                            <div>
+                                <label style="display:block; font-size:12px; color:var(--text-dim); margin-bottom:6px;">Target Driver ID</label>
+                                <input type="text" id="target-driver-id" placeholder="e.g. DRV-102" style="width:100%; padding:0.75rem; border-radius:8px; background:rgba(0,0,0,0.2); border:1px solid var(--border); color:white;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:12px; color:var(--text-dim); margin-bottom:6px;">Document Name</label>
+                                <input type="text" id="outbound-doc-name" placeholder="e.g. Rate-Con-123456" style="width:100%; padding:0.75rem; border-radius:8px; background:rgba(0,0,0,0.2); border:1px solid var(--border); color:white;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:12px; color:var(--text-dim); margin-bottom:6px;">Select PDF/Image</label>
+                                <input type="file" id="outbound-file" accept=".pdf,image/*" style="width:100%; padding:0.5rem; color:var(--text-dim); font-size:13px;">
+                            </div>
+                            <button class="btn-hq" id="btn-send-doc" onclick="sendOutboundDoc()" style="margin-top:1rem; justify-content:center;">
+                                <i data-lucide="send"></i> Dispatch Document
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card" style="margin-top:2rem;">
+                        <h3 style="margin-top:0;">Recently Sent</h3>
+                        <div id="sent-history-list" style="font-size:13px; color:var(--text-dim);">
+                            Loading history...
+                        </div>
+                    </div>`;
+                if (window.lucide) lucide.createIcons();
+                fetchSentHistory();
+
             } else if (section === 'logs') {
-                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Driver Logs</h1><div class="card"><p style="color:var(--text-dim);">Digital Driver Logs feed coming soon...</p></div>`;
+                mainEl.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h1 style="color:white;margin:0;font-size:32px;">Driver Compliance Logs</h1>
+                        <button class="tool-btn" onclick="showSection('logs')" style="height:auto; padding:0.5rem 1rem; flex-direction:row; gap:8px; background:rgba(255,255,255,0.05); border-radius:8px;">
+                            <i data-lucide="refresh-cw" style="width:14px;"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card" style="padding:0; overflow:hidden;">
+                        <div class="grid-header" style="margin:0; border-radius:0; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.3); padding:1rem 1.5rem; grid-template-columns: 150px 100px 150px 1fr 100px;">
+                            <div>Driver</div>
+                            <div>Status</div>
+                            <div>Timestamp</div>
+                            <div>Notes / Location</div>
+                            <div style="text-align:right;">Odo</div>
+                        </div>
+                        <div id="admin-logs-list" style="max-height: 70vh; overflow-y:auto;">
+                            <p style="color:var(--text-dim); text-align:center; padding:3rem;"><i data-lucide="loader-2" class="spin"></i> Loading latest compliance data...</p>
+                        </div>
+                    </div>`;
+                if (window.lucide) lucide.createIcons();
+                fetchDriverLogs();
             } else if (section === 'config') {
                 mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">System Config</h1><div class="card"><p style="color:var(--text-dim);">Supabase URL: Connected<br>Real-time: Enabled<br>RLS Policies: Active</p></div>`;
             }
         }
 
-        // PDF IN-APP VIEWER MODAL
+        async function fetchDriverLogs() {
+            if (!supabaseClient) return;
+            const list = document.getElementById('admin-logs-list');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('driver_logs')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    list.innerHTML = `<p style="color:var(--text-dim); text-align:center; padding:2rem;">No logs reported yet.</p>`;
+                    return;
+                }
+
+                list.innerHTML = data.map(log => `
+                    <div class="load-row" style="padding:1rem 1.5rem; display:grid; grid-template-columns: 150px 100px 150px 1fr 100px; font-size:13px;">
+                        <span style="font-weight:700;">${log.driver_name || 'N/A'}</span>
+                        <span class="status-badge" style="background:${log.status === 'DRIVING' ? 'rgba(16,185,129,0.1)' : 'rgba(100,116,139,0.1)'}; color:${log.status === 'DRIVING' ? '#10b981' : '#94a3b8'}; font-size:10px;">${log.status}</span>
+                        <span class="time">${new Date(log.created_at).toLocaleString()}</span>
+                        <span style="opacity:0.8;">${log.notes || '---'}</span>
+                        <span style="text-align:right; font-family:monospace;">${log.odometer || '---'}</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                list.innerHTML = `<p style="color:#ef4444; padding:1rem;">Error: ${e.message}</p>`;
+            }
+        }
+
+        async function fetchIncomingDocs() {
+            if (!supabaseClient) return;
+            const list = document.getElementById('incoming-list');
+            try {
+                // Documents drivers sent to Dispatch (receiver_id = 'ADMIN')
+                const { data, error } = await supabaseClient
+                    .from('document_transfers')
+                    .select('*')
+                    .eq('receiver_id', 'ADMIN')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    // Fallback to 'loads' table for now if document_transfers doesn't exist
+                    const { data: loadsData, error: loadsError } = await supabaseClient.from('loads').select('*').order('created_at', { ascending: false }).limit(20);
+                    if (loadsError) throw loadsError;
+
+                    list.innerHTML = loadsData.map(row => `
+                        <div class="load-row" style="padding:1rem 1.5rem; display:grid; grid-template-columns: 100px 1fr 150px 100px;">
+                            <span style="font-weight:700;">${row.driver_name || 'Driver'}</span>
+                            <span style="opacity:0.8;">LOAD: ${row.invoice_number}</span>
+                            <span class="time">${new Date(row.created_at).toLocaleString()}</span>
+                            <div style="text-align:right;">
+                                <button onclick="openPdfModal('${row.pdf_url}')" style="background:#0ea5e9; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:800;">VIEW</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = data.map(doc => `
+                        <div class="load-row" style="padding:1rem 1.5rem; display:grid; grid-template-columns: 100px 1fr 150px 100px;">
+                            <span style="font-weight:700;">${doc.sender_id}</span>
+                            <span style="opacity:0.8;">${doc.file_name}</span>
+                            <span class="time">${new Date(doc.created_at).toLocaleString()}</span>
+                            <div style="text-align:right;">
+                                <button onclick="openPdfModal('${doc.file_url}')" style="background:#0ea5e9; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:800;">VIEW</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {
+                list.innerHTML = `<p style="padding:1rem; opacity:0.5;">Note: No transfers found. Paperwork is in the Vault.</p>`;
+            }
+        }
+
+        async function fetchSentHistory() {
+            if (!supabaseClient) return;
+            const list = document.getElementById('sent-history-list');
+            try {
+                const { data, error } = await supabaseClient
+                    .from('document_transfers')
+                    .select('*')
+                    .eq('sender_id', 'ADMIN')
+                    .order('created_at', { ascending: false });
+
+                if (error || !data || data.length === 0) {
+                    list.innerHTML = `<p style="opacity:0.5;">No outbound documents recorded.</p>`;
+                    return;
+                }
+
+                list.innerHTML = data.map(doc => `
+                    <div style="padding:0.75rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
+                        <span>To: <b>${doc.receiver_id}</b> - ${doc.file_name}</span>
+                        <span>${new Date(doc.created_at).toLocaleDateString()}</span>
+                    </div>
+                `).join('');
+            } catch (e) { list.innerHTML = ''; }
+        }
+
+        async function sendOutboundDoc() {
+            const target = document.getElementById('target-driver-id').value.trim();
+            const name = document.getElementById('outbound-doc-name').value.trim();
+            const fileInput = document.getElementById('outbound-file');
+            const btn = document.getElementById('btn-send-doc');
+
+            if (!target || !name || !fileInput.files[0]) {
+                alert("Please fill all fields and select a file."); return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="spin" data-lucide="refresh-cw"></i> Sending...';
+            if (window.lucide) lucide.createIcons();
+
+            try {
+                const file = fileInput.files[0];
+                const fileName = `outbound/${Date.now()}_${file.name}`;
+
+                const { data: upload, error: upError } = await supabaseClient.storage
+                    .from('attachments')
+                    .upload(fileName, file);
+
+                if (upError) throw upError;
+
+                const { data: urlData } = supabaseClient.storage.from('attachments').getPublicUrl(upload.path);
+
+                const { error: dbError } = await supabaseClient.from('document_transfers').insert([{
+                    sender_id: 'ADMIN',
+                    receiver_id: target,
+                    file_url: urlData.publicUrl,
+                    file_name: name
+                }]);
+
+                if (dbError) throw dbError;
+
+                alert("Document successfully dispatched to " + target);
+                showSection('outgoing'); // Refresh
+            } catch (e) {
+                console.error(e);
+                alert("Failed to send: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="send"></i> Dispatch Document';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
         function openPdfModal(url) {
             const modal = document.getElementById('pdf-modal');
             const iframe = document.getElementById('pdf-iframe');
-
-            // Use Google Docs viewer to force it to render inline on mobile
-            iframe.src = 'https://docs.google.com/viewer?url=' + encodeURIComponent(url) + '&embedded=true';
-            modal.style.display = 'flex';
+            if (modal && iframe) {
+                iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+                modal.style.display = 'flex';
+            } else {
+                window.open(url, '_blank');
+            }
         }
 
         function closePdfModal() {
