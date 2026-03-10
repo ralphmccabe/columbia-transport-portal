@@ -753,22 +753,35 @@
                         data-lucide="x"></i></button>
             </div>
 
+            <!-- Timeline Visualizer -->
+            <label
+                style="display:block; margin-bottom: 0.5rem; font-weight: 700; color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Driver
+                Timeline (Today)</label>
+            <div
+                style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 5px; margin-bottom: 1.5rem; overflow-x: auto;">
+                <canvas id="log-timeline-canvas" width="450" height="150"
+                    style="display: block; width: 100%; height: auto; max-width: 600px; margin: 0 auto;"></canvas>
+            </div>
+
             <!-- Duty Status Selector -->
             <label
                 style="display:block; margin-bottom: 0.5rem; font-weight: 700; color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Duty
                 Status</label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem;"
                 id="duty-status-grid">
-                <button type="button" class="tool-btn log-status-btn active" data-status="OFF_DUTY"
-                    style="border-radius: 12px; height: 50px; background: #0ea5e9; color: white; border: none; font-weight: 700;">Off
+                <button type="button" class="log-status-btn active" data-status="OFF_DUTY"
+                    style="border-radius: 12px; height: 50px; background: #0ea5e9; color: white; border: none; font-weight: 700; cursor: pointer;">Off
                     Duty</button>
-                <button type="button" class="tool-btn log-status-btn" data-status="SLEEPER"
-                    style="border-radius: 12px; height: 50px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); font-weight: 700;">Sleeper</button>
-                <button type="button" class="tool-btn log-status-btn" data-status="DRIVING"
-                    style="border-radius: 12px; height: 50px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); font-weight: 700;">Driving</button>
-                <button type="button" class="tool-btn log-status-btn" data-status="ON_DUTY"
-                    style="border-radius: 12px; height: 50px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); font-weight: 700;">On
+                <button type="button" class="log-status-btn" data-status="SLEEPER"
+                    style="border-radius: 12px; height: 50px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); font-weight: 700; cursor: pointer;">Sleeper</button>
+                <button type="button" class="log-status-btn" data-status="DRIVING"
+                    style="border-radius: 12px; height: 50px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); font-weight: 700; cursor: pointer;">Driving</button>
+                <button type="button" class="log-status-btn" data-status="ON_DUTY"
+                    style="border-radius: 12px; height: 50px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); font-weight: 700; cursor: pointer;">On
                     Duty</button>
+                <button type="button" class="log-status-btn" data-status="PERSONAL_CONVEYANCE"
+                    style="grid-column: span 2; border-radius: 12px; height: 50px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); font-weight: 700; cursor: pointer;">Personal
+                    Conveyance (PC)</button>
             </div>
 
             <!-- Odometer & Notes -->
@@ -789,8 +802,8 @@
                 </div>
             </div>
 
-            <button id="btn-submit-log" class="tool-btn active"
-                style="width: 100%; height: 60px; border-radius: 30px; background: #10b981; border: none; font-weight: 800; font-size: 1.1rem; color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);">
+            <button id="btn-submit-log"
+                style="width: 100%; height: 60px; border-radius: 30px; background: #10b981; border: none; font-weight: 800; font-size: 1.1rem; color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); cursor: pointer; transition: all 0.2s;">
                 <i data-lucide="check-circle-2"></i> Submit Log Entry
             </button>
         </div>

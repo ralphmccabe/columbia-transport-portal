@@ -402,7 +402,7 @@ window.initButtons = () => {
         const closeLogs = document.getElementById('close-driver-logs');
 
         if (btnLogs && logsModal) {
-            btnLogs.onclick = () => { logsModal.style.display = 'flex'; };
+            btnLogs.onclick = () => { logsModal.style.display = 'flex'; if (window.renderLogTimeline) window.renderLogTimeline(); };
             if (closeLogs) closeLogs.onclick = () => { logsModal.style.display = 'none'; };
 
             // Status Selector Logic
@@ -451,8 +451,8 @@ window.initButtons = () => {
                         }
 
                         alert("Log Entry Submitted Successfully.");
-                        logsModal.style.display = 'none';
                         document.getElementById('log-notes').value = ''; // clear notes
+                        if (window.renderLogTimeline) window.renderLogTimeline(); // Refresh timeline in place
                     } catch (err) {
                         console.error("Log submission error:", err);
                         alert("Failed to submit log: " + err.message);
@@ -2789,4 +2789,136 @@ async function finalizePdf() {
         return await prepareFinalPdfBytes();
     }
     return currentPdfBytes || new Uint8Array();
+}
+
+// --- Driver Logs Timeline ---
+window.renderLogTimeline = async function () {
+    const canvas = document.getElementById('log-timeline-canvas');
+    if (!canvas || !window.supabaseClient) return;
+    const ctx = canvas.getContext('2d');
+
+    // Scale for crispness
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0) return; // hidden
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
+    ctx.scale(2, 2);
+    const w = rect.width;
+    const h = rect.height;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "12px Inter, sans-serif";
+    ctx.fillText("Loading timeline...", 10, 20);
+
+    const driver = (window.activeTrip && window.activeTrip.driverId) ? window.activeTrip.driverId : 'Anonymous Driver';
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    try {
+        const { data, error } = await window.supabaseClient.from('driver_logs')
+            .select('*')
+            .eq('driver_name', driver)
+            .gte('created_at', startOfDay.toISOString())
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        drawLogGraph(ctx, w, h, data || []);
+    } catch (err) {
+        console.error("Timeline load error:", err);
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "#ef4444";
+        ctx.fillText("Failed to load today's logs.", 10, 20);
+    }
+};
+
+function drawLogGraph(ctx, w, h, logs) {
+    ctx.clearRect(0, 0, w, h);
+
+    const rowHeight = h / 5;
+    const startX = 65;
+    const endX = w - 10;
+    const graphW = endX - startX;
+
+    const rows = ['OFF DUTY', 'SLEEPER', 'DRIVING', 'ON DUTY', 'PC'];
+
+    ctx.lineWidth = 1;
+    ctx.font = "bold 9px Inter, sans-serif";
+
+    for (let i = 0; i < 5; i++) {
+        const y = i * rowHeight + rowHeight / 2;
+        ctx.fillStyle = "#94a3b8";
+        ctx.fillText(rows[i], 5, y + 3);
+
+        ctx.beginPath();
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
+        ctx.strokeStyle = "rgba(255,255,255,0.15)";
+        ctx.stroke();
+    }
+
+    ctx.font = "8px Inter, sans-serif";
+    for (let i = 0; i <= 24; i++) {
+        const x = startX + (i / 24) * graphW;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.strokeStyle = (i % 6 === 0) ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.05)";
+        ctx.stroke();
+
+        if (i % 2 === 0) {
+            ctx.fillStyle = "rgba(255,255,255,0.4)";
+            let lbl = i === 0 ? "M" : (i === 12 ? "N" : (i === 24 ? "M" : (i > 12 ? i - 12 : i)));
+            ctx.fillText(lbl, x - 3, h - 2);
+        }
+    }
+
+    const getY = (status) => {
+        if (status === 'OFF_DUTY') return rowHeight / 2;
+        if (status === 'SLEEPER') return rowHeight + rowHeight / 2;
+        if (status === 'DRIVING') return 2 * rowHeight + rowHeight / 2;
+        if (status === 'ON_DUTY') return 3 * rowHeight + rowHeight / 2;
+        if (status === 'PERSONAL_CONVEYANCE') return 4 * rowHeight + rowHeight / 2;
+        return rowHeight / 2;
+    };
+
+    if (!logs || logs.length === 0) return;
+
+    ctx.strokeStyle = "#0ea5e9";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const msInDay = 24 * 60 * 60 * 1000;
+
+    let lastX = startX;
+    let lastY = getY(logs[0].status);
+
+    ctx.moveTo(startX, rowHeight / 2); // Start off duty at midnight
+
+    for (let i = 0; i < logs.length; i++) {
+        const logDate = new Date(logs[i].created_at);
+        let x = startX + ((logDate - startOfDay) / msInDay) * graphW;
+        if (x < startX) x = startX;
+        if (x > endX) x = endX;
+
+        ctx.lineTo(x, lastY);
+        lastY = getY(logs[i].status);
+        ctx.lineTo(x, lastY);
+
+        lastX = x;
+    }
+
+    const now = new Date();
+    let currentX = startX + ((now - startOfDay) / msInDay) * graphW;
+    if (currentX > endX) currentX = endX;
+    ctx.lineTo(currentX, lastY);
+    ctx.stroke();
+
+    ctx.fillStyle = "#0ea5e9";
+    ctx.beginPath();
+    ctx.arc(currentX, lastY, 4, 0, Math.PI * 2);
+    ctx.fill();
 }
