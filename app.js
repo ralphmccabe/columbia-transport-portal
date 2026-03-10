@@ -2793,44 +2793,46 @@ async function finalizePdf() {
 
 // --- Driver Logs Timeline ---
 window.renderLogTimeline = async function () {
-    const canvas = document.getElementById('log-timeline-canvas');
-    if (!canvas || !window.supabaseClient) return;
-    const ctx = canvas.getContext('2d');
+    setTimeout(async () => {
+        const canvas = document.getElementById('log-timeline-canvas');
+        if (!canvas || !supabaseClient) return;
+        const ctx = canvas.getContext('2d');
 
-    // Scale for crispness
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width === 0) return; // hidden
-    canvas.width = rect.width * 2;
-    canvas.height = rect.height * 2;
-    ctx.scale(2, 2);
-    const w = rect.width;
-    const h = rect.height;
+        // Scale for crispness
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0) return; // hidden
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+        ctx.scale(2, 2);
+        const w = rect.width;
+        const h = rect.height;
 
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "12px Inter, sans-serif";
-    ctx.fillText("Loading timeline...", 10, 20);
-
-    const driver = (window.activeTrip && window.activeTrip.driverId) ? window.activeTrip.driverId : 'Anonymous Driver';
-
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-
-    try {
-        const { data, error } = await window.supabaseClient.from('driver_logs')
-            .select('*')
-            .eq('driver_name', driver)
-            .gte('created_at', startOfDay.toISOString())
-            .order('created_at', { ascending: true });
-
-        if (error) throw error;
-        drawLogGraph(ctx, w, h, data || []);
-    } catch (err) {
-        console.error("Timeline load error:", err);
         ctx.clearRect(0, 0, w, h);
-        ctx.fillStyle = "#ef4444";
-        ctx.fillText("Failed to load today's logs.", 10, 20);
-    }
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "12px Inter, sans-serif";
+        ctx.fillText("Loading timeline...", 10, 20);
+
+        const driver = (activeTrip && activeTrip.driverId) ? activeTrip.driverId : 'Anonymous Driver';
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        try {
+            const { data, error } = await supabaseClient.from('driver_logs')
+                .select('*')
+                .eq('driver_name', driver)
+                .gte('created_at', startOfDay.toISOString())
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            drawLogGraph(ctx, w, h, data || []);
+        } catch (err) {
+            console.error("Timeline load error:", err);
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = "#ef4444";
+            ctx.fillText("Failed to load today's logs.", 10, 20);
+        }
+    }, 50); // Small delay to ensure modal display: flex has applied sizing
 };
 
 function drawLogGraph(ctx, w, h, logs) {
