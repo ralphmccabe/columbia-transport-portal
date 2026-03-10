@@ -421,7 +421,7 @@ window.initButtons = () => {
                 };
             });
 
-            // Submit Log
+            // Submit Entry
             const submitLogBtn = document.getElementById('btn-submit-log');
             if (submitLogBtn) {
                 submitLogBtn.onclick = async () => {
@@ -430,11 +430,10 @@ window.initButtons = () => {
                     const odo = document.getElementById('log-odometer').value;
                     const notes = document.getElementById('log-notes').value;
 
-                    // Fallback to anonymous if trip not started, or warn
-                    const driver = (activeTrip && activeTrip.driverId) ? activeTrip.driverId : 'Anonymous Driver';
-                    const truck = (activeTrip && activeTrip.truckId) ? activeTrip.truckId : 'Unknown Truck';
+                    const driver = (activeTrip && activeTrip.driver) ? activeTrip.driver : 'Anonymous Driver';
+                    const truck = (activeTrip && activeTrip.truck) ? activeTrip.truck : 'Unknown Truck';
 
-                    submitLogBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Submitting...';
+                    submitLogBtn.innerHTML = '<i data-lucide="loader-cw" class="spin"></i> Saving...';
                     if (window.lucide) lucide.createIcons();
 
                     try {
@@ -446,18 +445,52 @@ window.initButtons = () => {
                                 odometer: odo ? parseInt(odo) : null,
                                 notes: notes
                             }]);
-
                             if (error) throw error;
                         }
 
-                        alert("Log Entry Submitted Successfully.");
-                        document.getElementById('log-notes').value = ''; // clear notes
-                        if (window.renderLogTimeline) window.renderLogTimeline(); // Refresh timeline in place
+                        if (window.renderLogTimeline) window.renderLogTimeline();
+                        document.getElementById('log-notes').value = '';
                     } catch (err) {
                         console.error("Log submission error:", err);
-                        alert("Failed to submit log: " + err.message);
+                        alert("Failed to save entry: " + err.message);
                     } finally {
-                        submitLogBtn.innerHTML = '<i data-lucide="check-circle-2"></i> Submit Log Entry';
+                        submitLogBtn.innerHTML = '<i data-lucide="plus-circle"></i> Add Entry';
+                        if (window.lucide) lucide.createIcons();
+                    }
+                };
+            }
+
+            // Finish Shift / End Day
+            const finishLogBtn = document.getElementById('btn-finish-log');
+            if (finishLogBtn) {
+                finishLogBtn.onclick = async () => {
+                    if (!confirm("Are you sure you want to end your shift for today?")) return;
+
+                    const driver = (activeTrip && activeTrip.driver) ? activeTrip.driver : 'Anonymous Driver';
+                    const truck = (activeTrip && activeTrip.truck) ? activeTrip.truck : 'Unknown Truck';
+
+                    finishLogBtn.innerHTML = '<i data-lucide="loader-cw" class="spin"></i> Finishing...';
+                    if (window.lucide) lucide.createIcons();
+
+                    try {
+                        if (supabaseClient) {
+                            // Final entry to Off Duty
+                            const { error } = await supabaseClient.from('driver_logs').insert([{
+                                driver_name: driver,
+                                truck_number: truck,
+                                status: 'OFF_DUTY',
+                                notes: 'SHIFT FINISHED'
+                            }]);
+                            if (error) throw error;
+                        }
+
+                        alert("Shift Finished Successfully. Your logs have been submitted to the office.");
+                        logsModal.style.display = 'none';
+                    } catch (err) {
+                        console.error("Finish log error:", err);
+                        alert("Error finishing shift: " + err.message);
+                    } finally {
+                        finishLogBtn.innerHTML = '<i data-lucide="check-circle-2"></i> End Day';
                         if (window.lucide) lucide.createIcons();
                     }
                 };
@@ -2874,7 +2907,6 @@ window.renderLogTimeline = async function () {
         ctx.fillText("Loading timeline...", 10, 20);
 
         const driver = (activeTrip && activeTrip.driverId) ? activeTrip.driverId : 'Anonymous Driver';
-
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
@@ -2886,38 +2918,76 @@ window.renderLogTimeline = async function () {
                 .order('created_at', { ascending: true });
 
             if (error) throw error;
-            drawLogGraph(ctx, w, h, data || []);
+
+            const logs = data || [];
+            drawLogGraph(ctx, w, h, logs);
+            calculateLogHours(logs);
+
         } catch (err) {
             console.error("Timeline load error:", err);
             ctx.clearRect(0, 0, w, h);
             ctx.fillStyle = "#ef4444";
             ctx.fillText("Failed to load today's logs.", 10, 20);
         }
-    }, 50); // Small delay to ensure modal display: flex has applied sizing
+    }, 50);
 };
+
+function calculateLogHours(logs) {
+    const hours = { OFF_DUTY: 0, SLEEPER: 0, DRIVING: 0, ON_DUTY: 0, PERSONAL_CONVEYANCE: 0 };
+    if (!logs || logs.length === 0) {
+        // Assume Off Duty since Midnight
+        const now = new Date();
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        hours.OFF_DUTY = (now - startOfDay) / (1000 * 60 * 60);
+    } else {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        // Midnight to first log
+        let prevTime = startOfDay;
+        let prevStatus = 'OFF_DUTY';
+
+        for (const log of logs) {
+            const logTime = new Date(log.created_at);
+            const duration = (logTime - prevTime) / (1000 * 60 * 60);
+            if (duration > 0) hours[prevStatus] += duration;
+            prevTime = logTime;
+            prevStatus = log.status;
+        }
+
+        // Last log to now
+        const now = new Date();
+        const finalDuration = (now - prevTime) / (1000 * 60 * 60);
+        if (finalDuration > 0) hours[prevStatus] += finalDuration;
+    }
+
+    // Update UI
+    document.getElementById('hrs-off').innerText = hours.OFF_DUTY.toFixed(1) + 'h';
+    document.getElementById('hrs-sleeper').innerText = hours.SLEEPER.toFixed(1) + 'h';
+    document.getElementById('hrs-driving').innerText = hours.DRIVING.toFixed(1) + 'h';
+    document.getElementById('hrs-onduty').innerText = hours.ON_DUTY.toFixed(1) + 'h';
+    document.getElementById('hrs-pc').innerText = hours.PERSONAL_CONVEYANCE.toFixed(1) + 'h';
+}
 
 function drawLogGraph(ctx, w, h, logs) {
     ctx.clearRect(0, 0, w, h);
-
     const rowHeight = h / 5;
     const startX = 65;
     const endX = w - 10;
     const graphW = endX - startX;
-
     const rows = ['OFF DUTY', 'SLEEPER', 'DRIVING', 'ON DUTY', 'PC'];
 
     ctx.lineWidth = 1;
     ctx.font = "bold 9px Inter, sans-serif";
-
     for (let i = 0; i < 5; i++) {
         const y = i * rowHeight + rowHeight / 2;
         ctx.fillStyle = "#94a3b8";
         ctx.fillText(rows[i], 5, y + 3);
-
         ctx.beginPath();
         ctx.moveTo(startX, y);
         ctx.lineTo(endX, y);
-        ctx.strokeStyle = "rgba(255,255,255,0.15)";
+        ctx.strokeStyle = "rgba(255,255,255,0.1)";
         ctx.stroke();
     }
 
@@ -2927,9 +2997,8 @@ function drawLogGraph(ctx, w, h, logs) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, h);
-        ctx.strokeStyle = (i % 6 === 0) ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.05)";
+        ctx.strokeStyle = (i % 6 === 0) ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)";
         ctx.stroke();
-
         if (i % 2 === 0) {
             ctx.fillStyle = "rgba(255,255,255,0.4)";
             let lbl = i === 0 ? "M" : (i === 12 ? "N" : (i === 24 ? "M" : (i > 12 ? i - 12 : i)));
@@ -2946,42 +3015,43 @@ function drawLogGraph(ctx, w, h, logs) {
         return rowHeight / 2;
     };
 
-    if (!logs || logs.length === 0) return;
-
     ctx.strokeStyle = "#0ea5e9";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.beginPath();
 
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     const msInDay = 24 * 60 * 60 * 1000;
 
-    let lastX = startX;
-    let lastY = getY(logs[0].status);
+    let currentY = getY('OFF_DUTY');
+    ctx.moveTo(startX, currentY);
 
-    ctx.moveTo(startX, rowHeight / 2); // Start off duty at midnight
+    if (logs && logs.length > 0) {
+        for (let i = 0; i < logs.length; i++) {
+            const logDate = new Date(logs[i].created_at);
+            let x = startX + ((logDate - startOfDay) / msInDay) * graphW;
+            if (x < startX) x = startX;
+            if (x > endX) x = endX;
 
-    for (let i = 0; i < logs.length; i++) {
-        const logDate = new Date(logs[i].created_at);
-        let x = startX + ((logDate - startOfDay) / msInDay) * graphW;
-        if (x < startX) x = startX;
-        if (x > endX) x = endX;
-
-        ctx.lineTo(x, lastY);
-        lastY = getY(logs[i].status);
-        ctx.lineTo(x, lastY);
-
-        lastX = x;
+            // Step line: Horizontal to the event time, then Vertical to new status
+            ctx.lineTo(x, currentY);
+            currentY = getY(logs[i].status);
+            ctx.lineTo(x, currentY);
+        }
     }
 
+    // Line to current time
     const now = new Date();
-    let currentX = startX + ((now - startOfDay) / msInDay) * graphW;
-    if (currentX > endX) currentX = endX;
-    ctx.lineTo(currentX, lastY);
+    let nowX = startX + ((now - startOfDay) / msInDay) * graphW;
+    if (nowX > endX) nowX = endX;
+    ctx.lineTo(nowX, currentY);
     ctx.stroke();
 
+    // Dot at current status
     ctx.fillStyle = "#0ea5e9";
     ctx.beginPath();
-    ctx.arc(currentX, lastY, 4, 0, Math.PI * 2);
+    ctx.arc(nowX, currentY, 4, 0, Math.PI * 2);
     ctx.fill();
 }

@@ -785,27 +785,68 @@
             </div>
 
             <!-- Odometer & Notes -->
-            <div class="premium-group" style="margin-bottom: 1rem;">
-                <label for="log-odometer">Current Odometer</label>
-                <div class="premium-input">
-                    <i data-lucide="activity"></i>
-                    <input type="number" id="log-odometer" placeholder="e.g. 150230">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="premium-group">
+                    <label for="log-odometer">Odometer</label>
+                    <div class="premium-input">
+                        <i data-lucide="activity"></i>
+                        <input type="number" id="log-odometer" placeholder="e.g. 150230">
+                    </div>
+                </div>
+                <div class="premium-group">
+                    <label for="log-notes">Location</label>
+                    <div class="premium-input">
+                        <i data-lucide="map-pin"></i>
+                        <input type="text" id="log-notes" placeholder="City, ST">
+                    </div>
                 </div>
             </div>
 
-            <div class="premium-group" style="margin-bottom: 2rem;">
-                <label for="log-notes">Location / Remarks</label>
-                <div class="premium-input" style="height: auto; align-items: flex-start; padding-top: 0.8rem;">
-                    <i data-lucide="map-pin" style="margin-top: 4px;"></i>
-                    <textarea id="log-notes" rows="3" placeholder="City, State or Inspection Notes"
-                        style="border:none; outline:none; background:transparent; color:white; font-family:inherit; width:100%; resize:none;"></textarea>
+            <!-- Hours Summary Box -->
+            <div
+                style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1rem; margin-bottom: 2rem;">
+                <label
+                    style="display:block; margin-bottom: 0.75rem; font-weight: 700; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;">Daily
+                    Hours Summary</label>
+                <div id="log-hours-summary"
+                    style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.85rem; color: white;">
+                    <div
+                        style="display:flex; justify-content:space-between; padding-right:1rem; border-right:1px solid rgba(255,255,255,0.1);">
+                        <span style="opacity:0.6;">Off Duty:</span> <span id="hrs-off"
+                            style="font-weight:700;">0.0h</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding-left:1rem;">
+                        <span style="opacity:0.6;">Sleeper:</span> <span id="hrs-sleeper"
+                            style="font-weight:700;">0.0h</span>
+                    </div>
+                    <div
+                        style="display:flex; justify-content:space-between; padding-right:1rem; border-right:1px solid rgba(255,255,255,0.1);">
+                        <span style="opacity:0.6;">Driving:</span> <span id="hrs-driving"
+                            style="font-weight:700;">0.0h</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; padding-left:1rem;">
+                        <span style="opacity:0.6;">On Duty:</span> <span id="hrs-onduty"
+                            style="font-weight:700;">0.0h</span>
+                    </div>
+                    <div
+                        style="display:flex; justify-content:space-between; grid-column: span 2; padding-top: 0.5rem; margin-top: 0.25rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <span style="opacity:0.6;">Personal Conveyance:</span> <span id="hrs-pc"
+                            style="font-weight:700;">0.0h</span>
+                    </div>
                 </div>
             </div>
 
-            <button id="btn-submit-log"
-                style="width: 100%; height: 60px; border-radius: 30px; background: #10b981; border: none; font-weight: 800; font-size: 1.1rem; color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); cursor: pointer; transition: all 0.2s;">
-                <i data-lucide="check-circle-2"></i> Submit Log Entry
-            </button>
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 1rem;">
+                <button id="btn-submit-log"
+                    style="flex: 1.5; height: 56px; border-radius: 12px; background: #0ea5e9; border: none; font-weight: 800; font-size: 1rem; color: white; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer;">
+                    <i data-lucide="plus-circle"></i> Add Entry
+                </button>
+                <button id="btn-finish-log"
+                    style="flex: 1; height: 56px; border-radius: 12px; background: #10b981; border: none; font-weight: 800; font-size: 0.9rem; color: white; display: flex; align-items: center; justify-content: center; gap: 0.4rem; cursor: pointer;">
+                    <i data-lucide="check-circle-2"></i> End Day
+                </button>
+            </div>
         </div>
     </div>
 
@@ -813,7 +854,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="pdf.min.js"></script>
     <script src="pdf-lib.min.js"></script>
-    <script src="app.js?v=12"></script>
+    <script src="app.js?v=13"></script>
     <script>
         console.log("Bootstrapping Columbia Transport Portal...");
         window.addEventListener('load', () => {
@@ -837,7 +878,6 @@
             }
         });
     </script>
-    </div>
 </body>
 
 <!-- ===== ROUTE MAP: STANDALONE SCRIPT (independent of app.js) ===== -->
