@@ -467,7 +467,7 @@
 
         window.onload = init;
 
-        function showSection(section) {
+        async function showSection(section) {
             // Reset all nav buttons
             document.querySelectorAll('.btn-hq, .btn-nav').forEach(b => {
                 b.className = 'btn-nav';
@@ -475,15 +475,128 @@
             document.getElementById('nav-' + section).className = 'btn-hq btn-hq-active';
 
             const mainEl = document.querySelector('.admin-main');
+
             if (section === 'map') {
-                // Reload the page to show the main fleet view
                 location.reload();
             } else if (section === 'mgmt') {
-                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Driver Management</h1><p style="color:var(--text-dim);">Driver profile management coming soon. Drivers currently identified by login ID on mobile app.</p>`;
+                mainEl.innerHTML = `
+                    <h1 style="color:white;margin:0 0 1.5rem 0;font-size:32px;">Active Fleet Management</h1>
+                    <div id="mgmt-content" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                        <p style="color:var(--text-dim);"><i data-lucide="loader-2" class="spin"></i> Loading driver roster...</p>
+                    </div>`;
+                if (window.lucide) lucide.createIcons();
+
+                if (supabaseClient) {
+                    const { data, error } = await supabaseClient.from('gps_pings').select('driver_name, truck_number, created_at, trip_id').order('created_at', { ascending: false });
+                    const mgmtContent = document.getElementById('mgmt-content');
+                    if (error) {
+                        mgmtContent.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`;
+                        return;
+                    }
+
+                    const drivers = {};
+                    data.forEach(p => {
+                        const key = p.driver_name + '|' + p.truck_number;
+                        if (!drivers[key]) {
+                            drivers[key] = { ...p, pingCount: 1 };
+                        } else {
+                            drivers[key].pingCount++;
+                        }
+                    });
+
+                    const dArray = Object.values(drivers);
+                    if (dArray.length === 0) {
+                        mgmtContent.innerHTML = `<p style="color:var(--text-dim);">No active drivers found.</p>`;
+                    } else {
+                        mgmtContent.innerHTML = dArray.map(d => `
+                            <div class="card" style="margin-bottom:0;">
+                                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                                    <div style="width:48px; height:48px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center;">
+                                        <i data-lucide="user" style="color:white;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 style="margin:0; font-size:18px;">${d.driver_name || 'Anonymous'}</h3>
+                                        <p style="margin:4px 0 0 0; color:var(--text-dim); font-size:14px;">Vehicle: ${d.truck_number || 'Unknown'}</p>
+                                    </div>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-dim); border-top:1px solid var(--border); padding-top:1rem;">
+                                    <span>Last Active: ${new Date(d.created_at).toLocaleString()}</span>
+                                    <span class="status-badge status-online">Active</span>
+                                </div>
+                            </div>
+                        `).join('');
+                        if (window.lucide) lucide.createIcons();
+                    }
+                }
             } else if (section === 'vault') {
-                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Paperwork Vault</h1><p style="color:var(--text-dim);">All submitted loads are stored in Supabase. PDF storage bucket setup required to display documents here.</p>`;
+                mainEl.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                        <h1 style="color:white;margin:0;font-size:32px;">Paperwork Vault</h1>
+                        <div style="display:flex; gap:1rem; align-items:center;">
+                            <input type="text" id="vault-search" placeholder="Search invoices or drivers..." style="padding:0.75rem 1rem; border-radius:8px; background:rgba(0,0,0,0.2); border:1px solid var(--border); color:white; width:250px;">
+                        </div>
+                    </div>
+                    <div class="card" style="padding:0; overflow:hidden;">
+                        <div class="grid-header" style="margin:0; border-radius:0; border-bottom:1px solid var(--border); background:rgba(0,0,0,0.3); padding:1rem 1.5rem;">
+                            <div>Invoice #</div>
+                            <div>Driver Info</div>
+                            <div>Date Submitted</div>
+                            <div style="text-align:right;">Document</div>
+                        </div>
+                        <div id="vault-list" style="max-height: 70vh; overflow-y:auto;">
+                            <p style="color:var(--text-dim); text-align:center; padding:3rem;"><i data-lucide="loader-2" class="spin"></i> Loading historical records...</p>
+                        </div>
+                    </div>`;
+                if (window.lucide) lucide.createIcons();
+
+                if (supabaseClient) {
+                    const fetchVault = async (searchTerm = '') => {
+                        const vl = document.getElementById('vault-list');
+                        let query = supabaseClient.from('loads').select('*').order('created_at', { ascending: false });
+
+                        if (searchTerm) {
+                            // Supabase ilike search across multiple columns (driver_name or invoice_number)
+                            query = query.or(`driver_name.ilike.%${searchTerm}%,invoice_number.ilike.%${searchTerm}%,billed_to.ilike.%${searchTerm}%`);
+                        }
+
+                        const { data, error } = await query.limit(100);
+                        if (error) {
+                            vl.innerHTML = `<p style="color:#ef4444; padding:2rem;">Error: ${error.message}</p>`;
+                            return;
+                        }
+                        if (!data || data.length === 0) {
+                            vl.innerHTML = `<p style="color:var(--text-dim); padding:2rem; text-align:center;">No paperwork records found.</p>`;
+                            return;
+                        }
+
+                        vl.innerHTML = data.map(row => `
+                            <div class="load-row" style="padding:1rem 1.5rem; display:grid; grid-template-columns: 100px 1fr 150px 100px; align-items:center;">
+                                <span class="id" style="font-family:monospace; font-weight:700; color:var(--primary); font-size:15px;">${row.invoice_number || 'N/A'}</span>
+                                <span class="driver">
+                                    <div style="font-weight:700; color:white; font-size:15px;">${row.driver_name || row.billed_to || 'N/A'}</div>
+                                    <div style="font-size:12px; color:var(--text-dim); margin-top:2px;"><i data-lucide="truck" style="width:12px; height:12px; display:inline-block; vertical-align:middle; margin-right:4px;"></i>${row.truck_number || 'Unknown'}</div>
+                                </span>
+                                <span class="time" style="color:var(--text-dim); font-size:13px;">${new Date(row.created_at).toLocaleString()}</span>
+                                <div style="text-align:right;">
+                                    ${row.pdf_url ? `<a href="${row.pdf_url}" target="_blank" style="background:#0ea5e9; color:white; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.2s;"><i data-lucide="external-link" style="width:14px;"></i> VIEW</a>` : `<span class="status-badge status-online" style="background:rgba(16,185,129,0.1); color:#10b981; padding:6px 12px; border-radius:99px; font-size:11px; border:1px solid rgba(16,185,129,0.2);">Verified</span>`}
+                                </div>
+                            </div>
+                        `).join('');
+                        if (window.lucide) lucide.createIcons();
+                    };
+
+                    fetchVault();
+
+                    document.getElementById('vault-search').addEventListener('input', (e) => {
+                        // Debounce simple
+                        clearTimeout(window.vaultSearchTimer);
+                        window.vaultSearchTimer = setTimeout(() => {
+                            fetchVault(e.target.value.trim());
+                        }, 500);
+                    });
+                }
             } else if (section === 'config') {
-                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">System Config</h1><p style="color:var(--text-dim);">Supabase URL: Connected<br>Real-time: Enabled<br>RLS Policies: Active</p>`;
+                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">System Config</h1><div class="card"><p style="color:var(--text-dim);">Supabase URL: Connected<br>Real-time: Enabled<br>RLS Policies: Active</p></div>`;
             }
         }
     </script>
