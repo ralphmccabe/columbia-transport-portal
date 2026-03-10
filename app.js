@@ -2475,12 +2475,66 @@ async function refreshAdminList() {
 }
 
 // BOOT
+// BOOT
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         initButtons();
+        initEbol();
     });
 } else {
     initButtons();
+    initEbol();
+}
+
+// --- eBOL Scale View Logic ---
+function initEbol() {
+    const btnEbol = document.getElementById('btn-ebol');
+    const closeEbol = document.getElementById('close-ebol');
+    const ebolModal = document.getElementById('ebol-modal');
+    const ebolIframe = document.getElementById('ebol-iframe');
+
+    if (btnEbol) {
+        btnEbol.addEventListener('click', async () => {
+            if (!activeTrip || !pdfDoc) {
+                alert("No active trip to show eBOL for.");
+                return;
+            }
+            try {
+                // Ensure UI reflects saving process
+                btnEbol.innerHTML = '<i class="spin" data-lucide="loader-2"></i> Loading...';
+                if (window.lucide) lucide.createIcons();
+
+                // Finalize current state into bytes
+                const pdfBytes = await finalizePdf();
+
+                // Create object URL
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+
+                // Set iframe and show modal
+                ebolIframe.src = url;
+                ebolModal.style.display = 'flex';
+
+            } catch (err) {
+                console.error("eBOL Error:", err);
+                alert("Failed to generate scale view: " + err.message);
+            } finally {
+                btnEbol.innerHTML = '<i data-lucide="file-badge"></i> Scale eBOL';
+                if (window.lucide) lucide.createIcons();
+            }
+        });
+    }
+
+    if (closeEbol) {
+        closeEbol.addEventListener('click', () => {
+            ebolModal.style.display = 'none';
+            // Free memory
+            if (ebolIframe.src) {
+                URL.revokeObjectURL(ebolIframe.src);
+                ebolIframe.src = '';
+            }
+        });
+    }
 }
 // --- UI UTILITIES ---
 function showToast(message, duration = 3000) {
