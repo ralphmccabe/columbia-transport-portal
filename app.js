@@ -2558,23 +2558,35 @@ async function submitToOffice() {
 
         // 1. Finalize the PDF
         const pdfBytes = await finalizePdf();
-        const fileName = (activeTrip.id || 'Load') + '_' + Date.now() + '.pdf';
+        const fileName = (activeTrip.inv || 'Load') + '_' + Date.now() + '.pdf';
 
-        // 2. Upload to Supabase Storage (bucket: 'attachments')
-        const { data: uploadData, error: uploadError } = await supabaseClient.storage
-            .from('attachments')
-            .upload(fileName, pdfBytes, { contentType: 'application/pdf' });
+        // 2. Try to upload to Supabase Storage (optional — proceeds even if storage fails)
+        let pdfUrl = null;
+        try {
+            const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                .from('attachments')
+                .upload(fileName, pdfBytes, { contentType: 'application/pdf', upsert: true });
 
-        if (uploadError) throw uploadError;
+            if (!uploadError && uploadData) {
+                const { data: urlData } = supabaseClient.storage
+                    .from('attachments')
+                    .getPublicUrl(uploadData.path);
+                pdfUrl = urlData?.publicUrl || null;
+            } else {
+                console.warn('Upload error (non-fatal):', uploadError?.message);
+            }
+        } catch (storageErr) {
+            console.warn('Storage upload skipped:', storageErr.message);
+        }
 
-        // 3. Save Record to Supabase Tables
+        // 3. Save Record to Supabase Tables (always happens)
         const loadData = {
             trip_id: sessionVaultId,
             driver_name: activeTrip.driver,
             truck_number: activeTrip.truck,
             invoice_number: activeTrip.inv || 'N/A',
             billed_to: activeTrip.driver || 'N/A',
-            file_path: uploadData.path,
+            pdf_url: pdfUrl,
             status: 'submitted',
             created_at: new Date().toISOString()
         };
