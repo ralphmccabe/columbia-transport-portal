@@ -259,6 +259,8 @@
                 Live Fleet Map</button>
             <button class="btn-nav" id="nav-mgmt" onclick="showSection('mgmt')"><i data-lucide="users"></i>
                 Management</button>
+            <button class="btn-nav" id="nav-vault" onclick="showSection('vault')"><i data-lucide="folder-key"></i>
+                Paperwork Vault</button>
             <button class="btn-nav" id="nav-incoming" onclick="showSection('incoming')"><i data-lucide="inbox"></i>
                 Incoming Docs</button>
             <button class="btn-nav" id="nav-outgoing" onclick="showSection('outgoing')"><i data-lucide="send"></i>
@@ -532,10 +534,10 @@
                         if (window.lucide) lucide.createIcons();
                     }
                 }
-            } else if (section === 'incoming') {
+            } else if (section === 'vault') {
                 mainEl.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                        <h1 style="color:white;margin:0;font-size:32px;">Incoming Documents</h1>
+                        <h1 style="color:white;margin:0;font-size:32px;">Paperwork Vault</h1>
                         <div style="display:flex; gap:1rem; align-items:center;">
                             <input type="text" id="vault-search" placeholder="Search invoices or drivers..." style="padding:0.75rem 1rem; border-radius:8px; background:rgba(0,0,0,0.2); border:1px solid var(--border); color:white; width:250px;">
                         </div>
@@ -599,6 +601,8 @@
                         }, 500);
                     });
                 }
+            } else if (section === 'incoming') {
+                mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Incoming Documents</h1><div class="card"><p style="color:var(--text-dim);">Dispatch interface coming soon...</p></div>`;
             } else if (section === 'outgoing') {
                 mainEl.innerHTML = `<h1 style="color:white;margin:0 0 1rem 0;">Outgoing Documents</h1><div class="card"><p style="color:var(--text-dim);">Dispatch interface coming soon...</p></div>`;
             } else if (section === 'logs') {

@@ -385,11 +385,16 @@ window.initButtons = () => {
             loadEntryModal.style.display = 'flex';
         };
 
-        // Incoming & Outgoing (Mapped to Vault temporarily until we split them fully)
+        const btnVault = document.getElementById('btn-vault');
+        if (btnVault) btnVault.onclick = () => { // Changed to onclick
+            vaultModal.style.display = 'flex';
+            renderVault();
+        };
+
         const btnIncoming = document.getElementById('btn-incoming');
         const btnOutgoing = document.getElementById('btn-outgoing');
-        if (btnIncoming) btnIncoming.onclick = () => { vaultModal.style.display = 'flex'; renderVault(); };
-        if (btnOutgoing) btnOutgoing.onclick = () => { vaultModal.style.display = 'flex'; renderVault(); };
+        if (btnIncoming) btnIncoming.onclick = () => { alert("Incoming Docs workflow coming soon!"); };
+        if (btnOutgoing) btnOutgoing.onclick = () => { alert("Outgoing Docs workflow coming soon!"); };
 
         // Driver Logs Logic
         const btnLogs = document.getElementById('btn-driver-logs');
