@@ -2335,13 +2335,13 @@ async function uploadToSupabase(bytes, fileName, type = 'application/pdf') {
     if (!supabaseClient) return null;
     try {
         const { data, error } = await supabaseClient.storage
-            .from('load-packets')
+            .from('attachments')
             .upload(`${activeTrip.inv}/${fileName}`, bytes, {
                 contentType: type,
                 upsert: true
             });
         if (error) throw error;
-        const { data: urlData } = supabaseClient.storage.from('load-packets').getPublicUrl(data.path);
+        const { data: urlData } = supabaseClient.storage.from('attachments').getPublicUrl(data.path);
         return urlData.publicUrl;
     } catch (e) {
         console.error("Upload error:", e);
