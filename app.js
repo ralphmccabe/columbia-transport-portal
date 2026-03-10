@@ -2719,37 +2719,50 @@ async function submitToOffice() {
         btn.innerHTML = '<i class="spin" data-lucide="refresh-cw"></i> UPLOADING...';
         if (window.lucide) lucide.createIcons();
 
-        // 1. Finalize the PDF
-        const pdfBytes = await finalizePdf();
-        const fileName = (activeTrip.inv || 'Load') + '_' + Date.now() + '.pdf';
+        // 1. Finalize the Full PDF
+        const fullPdfBytes = await finalizePdf();
+        const fullFileName = (activeTrip.inv || 'Load') + '_Full_' + Date.now() + '.pdf';
 
-        // 2. Try to upload to Supabase Storage (optional — proceeds even if storage fails)
-        let pdfUrl = null;
-        try {
+        // 2. Generate Attachments-Only PDF (Raw Driver Paperwork)
+        const attachmentsBytes = await bakeAttachmentsOnly();
+        const attFileName = (activeTrip.inv || 'Load') + '_Docs_' + Date.now() + '.pdf';
+
+        let displayUrl = null;
+
+        // 3. Try finding and uploading the Attachments-Only PDF first
+        if (attachmentsBytes) {
             const { data: uploadData, error: uploadError } = await supabaseClient.storage
                 .from('attachments')
-                .upload(fileName, pdfBytes, { contentType: 'application/pdf', upsert: true });
+                .upload(attFileName, attachmentsBytes, { contentType: 'application/pdf', upsert: true });
 
             if (!uploadError && uploadData) {
-                const { data: urlData } = supabaseClient.storage
-                    .from('attachments')
-                    .getPublicUrl(uploadData.path);
-                pdfUrl = urlData?.publicUrl || null;
-            } else {
-                console.warn('Upload error (non-fatal):', uploadError?.message);
+                const { data: urlData } = supabaseClient.storage.from('attachments').getPublicUrl(uploadData.path);
+                displayUrl = urlData?.publicUrl || null;
             }
-        } catch (storageErr) {
-            console.warn('Storage upload skipped:', storageErr.message);
         }
 
-        // 3. Save Record to Supabase Tables (always happens)
+        // 4. Fallback: If no attachments exist or they failed, upload the full eBOL
+        if (!displayUrl) {
+            const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                .from('attachments')
+                .upload(fullFileName, fullPdfBytes, { contentType: 'application/pdf', upsert: true });
+
+            if (!uploadError && uploadData) {
+                const { data: urlData } = supabaseClient.storage.from('attachments').getPublicUrl(uploadData.path);
+                displayUrl = urlData?.publicUrl || null;
+            } else if (uploadError) {
+                console.warn('Fallback storage upload skipped:', uploadError.message);
+            }
+        }
+
+        // 5. Save Record to Supabase Tables
         const loadData = {
             trip_id: sessionVaultId,
             driver_name: activeTrip.driver,
             truck_number: activeTrip.truck,
             invoice_number: activeTrip.inv || 'N/A',
             billed_to: activeTrip.driver || 'N/A',
-            pdf_url: pdfUrl,
+            pdf_url: displayUrl,
             status: 'submitted',
             created_at: new Date().toISOString()
         };
@@ -2789,6 +2802,54 @@ async function finalizePdf() {
         return await prepareFinalPdfBytes();
     }
     return currentPdfBytes || new Uint8Array();
+}
+
+async function bakeAttachmentsOnly() {
+    if (typeof PDFLib === 'undefined') return null;
+
+    // Check if there are any real attachments
+    let hasAttachments = false;
+    for (const a of annotations) {
+        if (a.type === 'attach' && a.files && a.files.length > 0) {
+            hasAttachments = true; break;
+        }
+    }
+
+    if (!hasAttachments) return null;
+
+    const exportPdf = await PDFLib.PDFDocument.create();
+    const { rgb } = PDFLib;
+    let addedPages = 0;
+
+    for (const a of annotations) {
+        if (a.type === 'attach' && a.files && a.files.length > 0) {
+            for (const f of a.files) {
+                try {
+                    if (f.type === 'application/pdf') {
+                        let bytes = f.data;
+                        if (typeof bytes === 'string') {
+                            if (bytes.includes('base64,')) bytes = bytes.split('base64,')[1];
+                            bytes = base64ToBytes(bytes);
+                        }
+                        const attachmentDoc = await PDFLib.PDFDocument.load(bytes);
+                        const copiedPages = await exportPdf.copyPages(attachmentDoc, attachmentDoc.getPageIndices());
+                        copiedPages.forEach(p => { exportPdf.addPage(p); addedPages++; });
+                    } else if (f.type.startsWith('image/')) {
+                        const isPng = f.type.includes('png') || (typeof f.data === 'string' && f.data.startsWith('data:image/png'));
+                        const img = isPng ? await exportPdf.embedPng(f.data) : await exportPdf.embedJpg(f.data);
+                        const p = exportPdf.addPage([img.width, img.height]);
+                        p.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+                        addedPages++;
+                    }
+                } catch (err) {
+                    console.error("Failed to embed raw attachment:", f.name, err);
+                }
+            }
+        }
+    }
+
+    if (addedPages === 0) return null;
+    return await exportPdf.save();
 }
 
 // --- Driver Logs Timeline ---
