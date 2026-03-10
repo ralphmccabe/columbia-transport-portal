@@ -2495,7 +2495,7 @@ function initEbol() {
 
     if (btnEbol) {
         btnEbol.addEventListener('click', async () => {
-            if (!activeTrip || !pdfDoc) {
+            if (!activeTrip || !currentPdf) {
                 alert("No active trip to show eBOL for.");
                 return;
             }
