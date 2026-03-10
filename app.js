@@ -211,7 +211,7 @@ window.initButtons = () => {
         document.querySelectorAll('.tool-btn').forEach(btn => {
             if (btn.getAttribute('onclick')) return; // DON'T overwrite if already has handler
             btn.onclick = (e) => {
-                const ignore = ['btn-save', 'btn-import', 'btn-finish', 'btn-reset', 'btn-start-trip', 'btn-clear-sig', 'btn-save-sig', 'btn-zoom-in', 'btn-zoom-out', 'btn-demo', 'btn-scan-camera', 'btn-upload-file', 'btn-manual-load', 'btn-vault', 'btn-save-load', 'btn-share', 'btn-reset-view', 'btn-mobile-toggle', 'btn-mobile-fab', 'btn-undo', 'btn-quick-scan', 'btn-route-map', 'btn-show-route', 'btn-calendar', 'btn-calc', 'close-admin', 'btn-refresh-admin', 'btn-admin-portal'];
+                const ignore = ['btn-save', 'btn-import', 'btn-finish', 'btn-reset', 'btn-start-trip', 'btn-clear-sig', 'btn-save-sig', 'btn-zoom-in', 'btn-zoom-out', 'btn-demo', 'btn-scan-camera', 'btn-upload-file', 'btn-manual-load', 'btn-incoming', 'btn-outgoing', 'btn-driver-logs', 'btn-save-load', 'btn-share', 'btn-reset-view', 'btn-mobile-toggle', 'btn-mobile-fab', 'btn-undo', 'btn-quick-scan', 'btn-route-map', 'btn-show-route', 'btn-calendar', 'btn-calc', 'close-admin', 'btn-refresh-admin', 'btn-admin-portal'];
                 if (ignore.includes(btn.id)) return;
 
                 if (btn.classList.contains('active')) {
@@ -385,11 +385,79 @@ window.initButtons = () => {
             loadEntryModal.style.display = 'flex';
         };
 
-        const btnVault = document.getElementById('btn-vault');
-        if (btnVault) btnVault.onclick = () => { // Changed to onclick
-            vaultModal.style.display = 'flex';
-            renderVault();
-        };
+        // Incoming & Outgoing (Mapped to Vault temporarily until we split them fully)
+        const btnIncoming = document.getElementById('btn-incoming');
+        const btnOutgoing = document.getElementById('btn-outgoing');
+        if (btnIncoming) btnIncoming.onclick = () => { vaultModal.style.display = 'flex'; renderVault(); };
+        if (btnOutgoing) btnOutgoing.onclick = () => { vaultModal.style.display = 'flex'; renderVault(); };
+
+        // Driver Logs Logic
+        const btnLogs = document.getElementById('btn-driver-logs');
+        const logsModal = document.getElementById('driver-logs-modal');
+        const closeLogs = document.getElementById('close-driver-logs');
+
+        if (btnLogs && logsModal) {
+            btnLogs.onclick = () => { logsModal.style.display = 'flex'; };
+            if (closeLogs) closeLogs.onclick = () => { logsModal.style.display = 'none'; };
+
+            // Status Selector Logic
+            const statusBtns = document.querySelectorAll('.log-status-btn');
+            statusBtns.forEach(btn => {
+                btn.onclick = (e) => {
+                    statusBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.style.background = 'rgba(255,255,255,0.05)';
+                        b.style.border = '1px solid rgba(255,255,255,0.1)';
+                    });
+                    const target = e.currentTarget;
+                    target.classList.add('active');
+                    target.style.background = '#0ea5e9';
+                    target.style.border = 'none';
+                };
+            });
+
+            // Submit Log
+            const submitLogBtn = document.getElementById('btn-submit-log');
+            if (submitLogBtn) {
+                submitLogBtn.onclick = async () => {
+                    const activeStatusBtn = document.querySelector('.log-status-btn.active');
+                    const status = activeStatusBtn ? activeStatusBtn.dataset.status : 'OFF_DUTY';
+                    const odo = document.getElementById('log-odometer').value;
+                    const notes = document.getElementById('log-notes').value;
+
+                    // Fallback to anonymous if trip not started, or warn
+                    const driver = (activeTrip && activeTrip.driverId) ? activeTrip.driverId : 'Anonymous Driver';
+                    const truck = (activeTrip && activeTrip.truckId) ? activeTrip.truckId : 'Unknown Truck';
+
+                    submitLogBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Submitting...';
+                    if (window.lucide) lucide.createIcons();
+
+                    try {
+                        if (supabaseClient) {
+                            const { error } = await supabaseClient.from('driver_logs').insert([{
+                                driver_name: driver,
+                                truck_number: truck,
+                                status: status,
+                                odometer: odo ? parseInt(odo) : null,
+                                notes: notes
+                            }]);
+
+                            if (error) throw error;
+                        }
+
+                        alert("Log Entry Submitted Successfully.");
+                        logsModal.style.display = 'none';
+                        document.getElementById('log-notes').value = ''; // clear notes
+                    } catch (err) {
+                        console.error("Log submission error:", err);
+                        alert("Failed to submit log: " + err.message);
+                    } finally {
+                        submitLogBtn.innerHTML = '<i data-lucide="check-circle-2"></i> Submit Log Entry';
+                        if (window.lucide) lucide.createIcons();
+                    }
+                };
+            }
+        }
 
         const btnShare = document.getElementById('btn-share');
         if (btnShare) btnShare.onclick = () => { // Changed to onclick

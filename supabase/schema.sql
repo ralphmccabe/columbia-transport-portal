@@ -80,5 +80,23 @@ CREATE POLICY "allow_anon_insert_gps" ON public.gps_pings
 CREATE POLICY "allow_anon_select_gps" ON public.gps_pings
   FOR SELECT TO anon USING (true);
 
+CREATE TABLE IF NOT EXISTS public.driver_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    driver_name TEXT NOT NULL,
+    truck_number TEXT,
+    status TEXT NOT NULL,
+    odometer INTEGER,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.driver_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "allow_anon_insert_logs" ON public.driver_logs
+  FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY "allow_anon_select_logs" ON public.driver_logs
+  FOR SELECT TO anon USING (true);
+
 -- 4. Reload Schema Cache (Fixes "Table not found" errors)
 NOTIFY pgrst, 'reload schema';
