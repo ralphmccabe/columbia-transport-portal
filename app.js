@@ -2941,15 +2941,11 @@ window.renderLogTimeline = async function () {
         const canvas = document.getElementById('log-timeline-canvas');
         if (!canvas || !supabaseClient) return;
         const ctx = canvas.getContext('2d');
+        const w = 450, h = 150;
 
-        // Scale for crispness
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width === 0) return; // hidden
-        canvas.width = rect.width * 2;
-        canvas.height = rect.height * 2;
-        ctx.scale(2, 2);
-        const w = rect.width;
-        const h = rect.height;
+        // Ensure internal dimensions are correct
+        canvas.width = w;
+        canvas.height = h;
 
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = "#94a3b8";
@@ -2998,9 +2994,23 @@ window.renderLogTimeline = async function () {
         }
     };
 
+    // Immediate render, the interval is managed externally or checked
     await runRender();
-    // Start interval to keep the "Now" line accurate
-    logRefreshTimer = setInterval(runRender, 60000);
+
+    // Safety: Only start the timer if it doesn't exist
+    if (!logRefreshTimer) {
+        logRefreshTimer = setInterval(async () => {
+            // Check if modal is still open before heavy lifting
+            const modal = document.getElementById('driver-logs-modal');
+            if (modal && modal.style.display !== 'none') {
+                await runRender();
+            } else {
+                // If modal closed, we can stop the timer to save resources
+                clearInterval(logRefreshTimer);
+                logRefreshTimer = null;
+            }
+        }, 60000);
+    }
 };
 
 function calculateLogHours(logs) {
@@ -3057,7 +3067,10 @@ function calculateLogHours(logs) {
 }
 
 function drawLogGraph(ctx, w, h, logs) {
-    ctx.clearRect(0, 0, w, h);
+    // Solid dark background for the graph area
+    ctx.fillStyle = "#0f172a";
+    ctx.fillRect(0, 0, w, h);
+
     const rowHeight = h / 5;
     const startX = 65;
     const endX = w - 10;
