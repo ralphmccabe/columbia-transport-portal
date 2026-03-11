@@ -98,5 +98,23 @@ CREATE POLICY "allow_anon_insert_logs" ON public.driver_logs
 CREATE POLICY "allow_anon_select_logs" ON public.driver_logs
   FOR SELECT TO anon USING (true);
 
--- 4. Reload Schema Cache (Fixes "Table not found" errors)
+-- 4. Document Transfers Table
+CREATE TABLE IF NOT EXISTS public.document_transfers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sender_id TEXT NOT NULL,
+    receiver_id TEXT NOT NULL,
+    file_url TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.document_transfers ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "allow_anon_insert_transfers" ON public.document_transfers
+  FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY "allow_anon_select_transfers" ON public.document_transfers
+  FOR SELECT TO anon USING (true);
+
+-- 5. Reload Schema Cache (Fixes "Table not found" errors)
 NOTIFY pgrst, 'reload schema';

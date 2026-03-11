@@ -2994,23 +2994,8 @@ window.renderLogTimeline = async function () {
         }
     };
 
-    // Immediate render, the interval is managed externally or checked
+    // Immediate render only. All auto-refresh timers removed for stability.
     await runRender();
-
-    // Safety: Only start the timer if it doesn't exist
-    if (!logRefreshTimer) {
-        logRefreshTimer = setInterval(async () => {
-            // Check if modal is still open before heavy lifting
-            const modal = document.getElementById('driver-logs-modal');
-            if (modal && modal.style.display !== 'none') {
-                await runRender();
-            } else {
-                // If modal closed, we can stop the timer to save resources
-                clearInterval(logRefreshTimer);
-                logRefreshTimer = null;
-            }
-        }, 60000);
-    }
 };
 
 function calculateLogHours(logs) {
