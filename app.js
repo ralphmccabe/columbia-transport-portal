@@ -144,11 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedDriver && inputName) inputName.value = savedDriver;
         if (savedTruck && inputTruck) inputTruck.value = savedTruck;
 
-        // Force sidebar badge update if data is present
+        // Pre-fill IDs if saved, but do NOT auto-start (User wants to manual test)
         if (savedDriver && savedTruck) {
-            const badge = document.getElementById('driver-status-badge');
-            if (badge) badge.style.display = 'block';
-            window.handleStartTrip();
+            console.log("Pre-filling saved credentials for convenience.");
+            // Badge will be shown when handleStartTrip is called
         }
     }, 300);
 });
@@ -457,19 +456,43 @@ window.initButtons = () => {
             btnLogs.onclick = () => { logsModal.style.display = 'flex'; if (window.renderLogTimeline) window.renderLogTimeline(); };
             if (closeLogs) closeLogs.onclick = () => { logsModal.style.display = 'none'; };
 
-            // Status Selector Logic
+            // Status Selector Logic (One-Click Switching)
             const statusBtns = document.querySelectorAll('.log-status-btn');
             statusBtns.forEach(btn => {
-                btn.onclick = (e) => {
+                btn.onclick = async (e) => {
+                    const target = e.currentTarget;
+                    const status = target.dataset.status;
+
+                    // Don't log if already in this status
+                    const currentActive = document.querySelector('.log-status-btn.active');
+                    if (currentActive && currentActive.dataset.status === status) return;
+
                     statusBtns.forEach(b => {
                         b.classList.remove('active');
                         b.style.background = 'rgba(255,255,255,0.05)';
                         b.style.border = '1px solid rgba(255,255,255,0.1)';
                     });
-                    const target = e.currentTarget;
+
                     target.classList.add('active');
                     target.style.background = '#0ea5e9';
                     target.style.border = 'none';
+
+                    // IMMEDIATE SAVE (One-Click Switch)
+                    if (supabaseClient && activeTrip) {
+                        try {
+                            const { error } = await supabaseClient.from('driver_logs').insert([{
+                                driver_name: activeTrip.driver,
+                                truck_number: activeTrip.truck,
+                                status: status,
+                                notes: 'Status switched via Quick Buttons'
+                            }]);
+                            if (error) throw error;
+                            console.log("Logged shift status switch:", status);
+                            if (window.renderLogTimeline) window.renderLogTimeline();
+                        } catch (err) {
+                            console.error("Quick log failed:", err);
+                        }
+                    }
                 };
             });
 
@@ -2933,7 +2956,7 @@ window.renderLogTimeline = async function () {
         ctx.font = "12px Inter, sans-serif";
         ctx.fillText("Loading timeline...", 10, 20);
 
-        const driver = (activeTrip && activeTrip.driverId) ? activeTrip.driverId : 'Anonymous Driver';
+        const driver = (activeTrip && activeTrip.driver) ? activeTrip.driver : 'Anonymous Driver';
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
@@ -2949,6 +2972,23 @@ window.renderLogTimeline = async function () {
             const logs = data || [];
             drawLogGraph(ctx, w, h, logs);
             calculateLogHours(logs);
+
+            // Auto-highlight the current status button
+            if (logs.length > 0) {
+                const latest = logs[logs.length - 1].status;
+                const statusBtns = document.querySelectorAll('.log-status-btn');
+                statusBtns.forEach(btn => {
+                    if (btn.dataset.status === latest) {
+                        btn.classList.add('active');
+                        btn.style.background = '#0ea5e9';
+                        btn.style.border = 'none';
+                    } else {
+                        btn.classList.remove('active');
+                        btn.style.background = 'rgba(255,255,255,0.05)';
+                        btn.style.border = '1px solid rgba(255,255,255,0.1)';
+                    }
+                });
+            }
 
         } catch (err) {
             console.error("Timeline load error:", err);

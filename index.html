@@ -61,6 +61,13 @@
                         <i data-lucide="play"></i>
                         Start Shift
                     </button>
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <button onclick="localStorage.clear(); location.reload();"
+                            style="background: none; border: none; color: #64748b; font-size: 0.75rem; text-decoration: underline; cursor: pointer;">
+                            Clear Device Data / Start Over
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -73,15 +80,18 @@
 
             <!-- Driver Status Status Badge -->
             <div id="driver-status-badge"
-                style="padding: 10px; margin: 0 10px 1.5rem; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); display: none;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                style="padding: 12px; margin: 0 12px 1.5rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: none; overflow: hidden;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
                     <div id="status-indicator-dot"
-                        style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></div>
+                        style="width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; box-shadow: 0 0 10px rgba(148,163,184,0.3);">
+                    </div>
                     <span id="sidebar-status-text"
-                        style="font-size: 11px; font-weight: 700; color: white; text-transform: uppercase;">OFF
+                        style="font-size: 11px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">OFF
                         DUTY</span>
                 </div>
-                <div id="sidebar-hours-text" style="font-size: 10px; color: var(--text-dim);">Logged: 0.0h</div>
+                <div id="sidebar-hours-text"
+                    style="font-size: 10px; color: var(--text-dim); font-weight: 600; padding-left: 20px;">Logged: 0.0h
+                </div>
             </div>
 
             <div class="tool-group">
