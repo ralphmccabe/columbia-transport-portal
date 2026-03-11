@@ -493,41 +493,82 @@
                 if (window.lucide) lucide.createIcons();
 
                 if (supabaseClient) {
-                    const { data, error } = await supabaseClient.from('gps_pings').select('driver_name, truck_number, created_at, trip_id').order('created_at', { ascending: false });
+                    const { data: pings, error: pingError } = await supabaseClient.from('gps_pings').select('driver_name, truck_number, created_at, trip_id').order('created_at', { ascending: false });
+                    const { data: logs, error: logError } = await supabaseClient.from('driver_logs').select('*').gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).order('created_at', { ascending: true });
+
                     const mgmtContent = document.getElementById('mgmt-content');
-                    if (error) {
-                        mgmtContent.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`;
+                    if (pingError) {
+                        mgmtContent.innerHTML = `<p style="color:#ef4444;">Error: ${pingError.message}</p>`;
                         return;
                     }
 
                     const drivers = {};
-                    data.forEach(p => {
-                        const key = p.driver_name + '|' + p.truck_number;
+                    pings.forEach(p => {
+                        const key = (p.driver_name || 'Anonymous') + '|' + (p.truck_number || 'N/A');
                         if (!drivers[key]) {
-                            drivers[key] = { ...p, pingCount: 1 };
-                        } else {
-                            drivers[key].pingCount++;
+                            drivers[key] = {
+                                ...p,
+                                status: 'OFF_DUTY',
+                                hours: 0,
+                                lastPing: p.created_at
+                            };
                         }
                     });
+
+                    // Match logs to drivers and helper to calculate hours
+                    if (logs) {
+                        Object.keys(drivers).forEach(key => {
+                            const [name, truck] = key.split('|');
+                            const driverLogs = logs.filter(l => l.driver_name === name);
+                            if (driverLogs.length > 0) {
+                                const latest = driverLogs[driverLogs.length - 1];
+                                drivers[key].status = latest.status;
+
+                                // Simple hours since midnight (or first log)
+                                let totalMs = 0;
+                                let prevTime = new Date(new Date().setHours(0, 0, 0, 0));
+                                let prevStatus = 'OFF_DUTY';
+
+                                driverLogs.forEach(l => {
+                                    const logTime = new Date(l.created_at);
+                                    if (prevStatus !== 'OFF_DUTY' && prevStatus !== 'SLEEPER') {
+                                        totalMs += (logTime - prevTime);
+                                    }
+                                    prevTime = logTime;
+                                    prevStatus = l.status;
+                                });
+                                // Add time from last log to now if still on duty
+                                if (prevStatus !== 'OFF_DUTY' && prevStatus !== 'SLEEPER') {
+                                    totalMs += (new Date() - prevTime);
+                                }
+                                drivers[key].hours = totalMs / (1000 * 60 * 60);
+                            }
+                        });
+                    }
 
                     const dArray = Object.values(drivers);
                     if (dArray.length === 0) {
                         mgmtContent.innerHTML = `<p style="color:var(--text-dim);">No active drivers found.</p>`;
                     } else {
                         mgmtContent.innerHTML = dArray.map(d => `
-                            <div class="card" style="margin-bottom:0;">
+                            <div class="card" style="margin-bottom:0; border-left: 4px solid ${d.status === 'DRIVING' || d.status === 'ON_DUTY' ? '#10b981' : '#94a3b8'};">
                                 <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
-                                    <div style="width:48px; height:48px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center;">
+                                    <div style="width:48px; height:48px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; position:relative;">
                                         <i data-lucide="user" style="color:white;"></i>
+                                        <div style="position:absolute; bottom:0; right:0; width:12px; height:12px; border-radius:50%; background:${d.status === 'DRIVING' || d.status === 'ON_DUTY' ? '#10b981' : '#ef4444'}; border:2px solid #1e293b;"></div>
                                     </div>
-                                    <div>
+                                    <div style="flex:1;">
                                         <h3 style="margin:0; font-size:18px;">${d.driver_name || 'Anonymous'}</h3>
                                         <p style="margin:4px 0 0 0; color:var(--text-dim); font-size:14px;">Vehicle: ${d.truck_number || 'Unknown'}</p>
                                     </div>
+                                    <div style="text-align:right;">
+                                        <div style="font-size:18px; font-weight:800; color:white;">${d.hours.toFixed(1)}h</div>
+                                        <div style="font-size:10px; color:var(--text-dim); text-transform:uppercase;">Logged Today</div>
+                                    </div>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-dim); border-top:1px solid var(--border); padding-top:1rem;">
-                                    <span>Last Active: ${new Date(d.created_at).toLocaleString()}</span>
-                                    <span class="status-badge status-online">Active</span>
+                                    <span>Last Active: ${new Date(d.lastPing).toLocaleTimeString()}</span>
+                                    <span class="status-badge" style="background:${d.status === 'DRIVING' || d.status === 'ON_DUTY' ? 'rgba(16,185,129,0.1)' : 'rgba(148,163,184,0.1)'}; color:${d.status === 'DRIVING' || d.status === 'ON_DUTY' ? '#10b981' : '#94a3b8'};">${d.status.replace('_', ' ')}</span>
                                 </div>
                             </div>
                         `).join('');

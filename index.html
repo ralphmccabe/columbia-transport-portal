@@ -71,6 +71,19 @@
                 <div class="logo-circle">CT</div>
             </div>
 
+            <!-- Driver Status Status Badge -->
+            <div id="driver-status-badge"
+                style="padding: 10px; margin: 0 10px 1.5rem; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); display: none;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                    <div id="status-indicator-dot"
+                        style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8;"></div>
+                    <span id="sidebar-status-text"
+                        style="font-size: 11px; font-weight: 700; color: white; text-transform: uppercase;">OFF
+                        DUTY</span>
+                </div>
+                <div id="sidebar-hours-text" style="font-size: 10px; color: var(--text-dim);">Logged: 0.0h</div>
+            </div>
+
             <div class="tool-group">
                 <button class="tool-btn" id="btn-vault">
                     <i data-lucide="archive"></i>
@@ -148,6 +161,13 @@
                     <i data-lucide="refresh-cw"></i>
                     <span>Clear</span>
                 </button>
+                <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <button class="tool-btn" id="btn-logout" onclick="window.handleLogout()"
+                        style="color: #f87171; width: 100%;">
+                        <i data-lucide="log-out"></i>
+                        <span>Log Out</span>
+                    </button>
+                </div>
             </div>
 
             <button id="btn-admin-portal" class="tool-btn" title="HQ Admin Portal">

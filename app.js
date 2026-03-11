@@ -47,7 +47,7 @@ let lastDeletedVaultItem = null;
 let startOverlay, startBtn, driverInput, finishBtn, importBtn, canvasContainer, loadEntryModal, vaultModal, popup, closePopupBtn, shareModal;
 
 // FAST-BOOT: Defined globally for instant login reliability
-window.handleStartTrip = () => {
+window.handleStartTrip = async () => {
     const overlay = document.getElementById('start-overlay');
     const input = document.getElementById('driver-name');
     const truckInput = document.getElementById('truck-id');
@@ -79,12 +79,58 @@ window.handleStartTrip = () => {
         stop: "01",
         logs: []
     };
-    sessionVaultId = 'session_' + Date.now();
+    const today = new Date().toISOString().split('T')[0];
+    sessionVaultId = `shift_${driverId}_${today}`;
 
     if (overlay) overlay.style.display = 'none';
+    const badge = document.getElementById('driver-status-badge');
+    if (badge) badge.style.display = 'block';
     console.log("Trip Started for Driver:", driverId, "Truck:", truckId);
 
+    // AUTO-LOG ON DUTY (SHIFT START)
+    if (supabaseClient) {
+        try {
+            await supabaseClient.from('driver_logs').insert([{
+                driver_name: driverId,
+                truck_number: truckId,
+                status: 'ON_DUTY',
+                notes: 'SHIFT STARTED (LOG IN)'
+            }]);
+            console.log("Automatic ON DUTY log sent.");
+        } catch (e) {
+            console.error("Shift-start log failed:", e);
+        }
+    }
+
     if (window.sendGpsPing) window.sendGpsPing();
+};
+
+window.handleLogout = async () => {
+    if (!confirm("Are you sure you want to log out and end your active session?")) return;
+
+    if (supabaseClient && activeTrip) {
+        try {
+            // Final OFF DUTY log
+            await supabaseClient.from('driver_logs').insert([{
+                driver_name: activeTrip.driver,
+                truck_number: activeTrip.truck,
+                status: 'OFF_DUTY',
+                notes: 'LOGGED OUT (SHIFT END)'
+            }]);
+        } catch (e) { console.error("Logout log failed:", e); }
+    }
+
+    // Stop GPS
+    if (gpsPingTimer) clearTimeout(gpsPingTimer);
+    gpsPingTimer = null;
+
+    // Reset State
+    activeTrip = null;
+    sessionVaultId = null;
+    const overlay = document.getElementById('start-overlay');
+    if (overlay) overlay.style.display = 'flex';
+
+    console.log("Driver Logged Out.");
 };
 
 // Auto-fill remembered device info on load
@@ -92,13 +138,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const savedDriver = localStorage.getItem('ct_driver_id');
         const savedTruck = localStorage.getItem('ct_truck_id');
-        if (savedDriver && document.getElementById('driver-name')) {
-            document.getElementById('driver-name').value = savedDriver;
+        const inputName = document.getElementById('driver-name');
+        const inputTruck = document.getElementById('truck-id');
+
+        if (savedDriver && inputName) inputName.value = savedDriver;
+        if (savedTruck && inputTruck) inputTruck.value = savedTruck;
+
+        // Force sidebar badge update if data is present
+        if (savedDriver && savedTruck) {
+            const badge = document.getElementById('driver-status-badge');
+            if (badge) badge.style.display = 'block';
+            window.handleStartTrip();
         }
-        if (savedTruck && document.getElementById('truck-id')) {
-            document.getElementById('truck-id').value = savedTruck;
-        }
-    }, 100);
+    }, 300);
 });
 
 function getEventCoords(e, container) {
@@ -2858,8 +2910,11 @@ async function bakeAttachmentsOnly() {
 }
 
 // --- Driver Logs Timeline ---
+let logRefreshTimer = null;
 window.renderLogTimeline = async function () {
-    setTimeout(async () => {
+    if (logRefreshTimer) clearInterval(logRefreshTimer);
+
+    const runRender = async () => {
         const canvas = document.getElementById('log-timeline-canvas');
         if (!canvas || !supabaseClient) return;
         const ctx = canvas.getContext('2d');
@@ -2901,7 +2956,11 @@ window.renderLogTimeline = async function () {
             ctx.fillStyle = "#ef4444";
             ctx.fillText("Failed to load today's logs.", 10, 20);
         }
-    }, 50);
+    };
+
+    await runRender();
+    // Start interval to keep the "Now" line accurate
+    logRefreshTimer = setInterval(runRender, 60000);
 };
 
 function calculateLogHours(logs) {
@@ -2940,6 +2999,21 @@ function calculateLogHours(logs) {
     document.getElementById('hrs-driving').innerText = hours.DRIVING.toFixed(1) + 'h';
     document.getElementById('hrs-onduty').innerText = hours.ON_DUTY.toFixed(1) + 'h';
     document.getElementById('hrs-pc').innerText = hours.PERSONAL_CONVEYANCE.toFixed(1) + 'h';
+
+    // Update Sidebar Badge
+    const sidebarStatus = document.getElementById('sidebar-status-text');
+    const sidebarHours = document.getElementById('sidebar-hours-text');
+    const statusDot = document.getElementById('status-indicator-dot');
+
+    if (sidebarStatus) {
+        const current = logs && logs.length > 0 ? logs[logs.length - 1].status : 'OFF_DUTY';
+        sidebarStatus.innerText = current.replace('_', ' ');
+        if (statusDot) statusDot.style.background = (current === 'DRIVING' || current === 'ON_DUTY') ? '#10b981' : '#94a3b8';
+    }
+    if (sidebarHours) {
+        const total = hours.DRIVING + hours.ON_DUTY;
+        sidebarHours.innerText = `Logged: ${total.toFixed(1)}h`;
+    }
 }
 
 function drawLogGraph(ctx, w, h, logs) {
